@@ -1,54 +1,7 @@
+# secret files for this project
+code/include/secrets.h
+
+# dotfiles and build exclude
+code/.pio/
+code/.vscode/
 .DS_Store
-Notes on multitasking.md
-Project Ideation.md
-Vim Cheatsheet.md
-attachments
-banziGettingStartedArduino.md
-some vim things 2.md
-some vim things.md
-that_marouk_ish.md
-tmi 16 Object Oriented Programming.md
-tmi 17 Home Automation.md
-tmi Arduino Resources.md
-tmi Communities.md
-tmi Example Template.md
-tmi Examples.md
-tmi Lab Notebook 2.md
-tmi Lab Notebook.md
-tmi Log.md
-tmi Notes on multitasking.md
-tmi Questions.md
-tmi02 Digital Inputs.md
-tmi03 Digital Inputs Debounce w Millis.md
-tmi04 RGB LED.md
-tmi05 Pushbutton LED Fade.md
-tmi06 LDR analogWrite to LED.md
-tmi07 Buzzers.md
-tmi08 Micro Servo.md
-tmi09 Ultrasonic Sensor.md
-tmi10 Matrix Keypad.md
-tmi11 Temp and Humidity Sensor.md
-tmi12 Serial Input Basics.md
-tmi14 Multitasking-1.md
-tmi15 Multitasking-2.md
-code/Example Code - Move Servo to User Defined Position.md
-code/millis()_forum_examples
-code/tmi00_Template
-code/tmi01_Blink
-code/tmi02_Digital-Inputs
-code/tmi03_Digital-Inputs-Debounce-Millis
-code/tmi04_RGB_LED
-code/tmi05_pushbutton_led_fade
-code/tmi06_LDR-analogWrite-to-LED
-code/tmi07_Buzzers
-code/tmi08_Micro-Servo
-code/tmi09_Ultrasonic-Sensor
-code/tmi10_Matrix-Keypad
-code/tmi11_Temp-and-Humidity-Sensor
-code/tmi12_Serial-Input-Basics
-code/tmi13_Blink-PlatformIO
-code/tmi14_Multitasking-1
-code/tmi16_Multitasking-OOP
-code/tmi99_Other
-code/tmi17_MQTT_ESP/include/secrets.h
-zArchive
