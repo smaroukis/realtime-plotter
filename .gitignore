@@ -1,5 +1,6 @@
 # secret files for this project
 code/include/secrets.h
+private/
 
 # dotfiles and build exclude
 code/.pio/
