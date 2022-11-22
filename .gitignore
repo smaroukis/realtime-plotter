@@ -1,8 +1,8 @@
 # secret files for this project
-code/include/secrets.h
+include/secrets.h
 private/
 
 # dotfiles and build exclude
-code/.pio/
-code/.vscode/
+.pio/
+.vscode/
 .DS_Store
