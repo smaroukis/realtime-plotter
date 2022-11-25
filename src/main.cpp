@@ -17,6 +17,10 @@
 // Custom Headers
 #include "sensorFunctions.h"
 
+// Mqtt publish string specifics
+const char* DEVICE_ID = "esp-01";
+const char* GATEWAY_ID = "home";
+
 // Wifi 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient); //lib required for mqtt
@@ -90,6 +94,27 @@ void connectMqtt()
   }
 }
 
+// HERE
+// TODO really we should also make a publishStatus helper
+boolean publishTemperature(PubSubClient& mqttClient, float temperature) {
+  // TODO publish value as string to GATEWAY_ID/DEVICE_ID/status/temp
+  // just like mqttClient.publish() returns false if failed
+
+  // 1) Create Topic String
+  const char* tmpStr = "/status/temp";
+  int bLen = strlen(GATEWAY_ID) + 1 + strlen(DEVICE_ID) + 1 + strlen(tmpStr); // don't forget to count the forward slashes
+  char topic[bLen];
+  sprintf(topic, "%s/%s/status/temp", GATEWAY_ID, DEVICE_ID);
+
+  // 2)  convert temp float to string to publish
+  static char payload[7]; // buffer variable
+  dtostrf(temperature, 6, 2, payload); // dtostrf(float, width, precision, buffer)
+
+  // 3) publish
+  return mqttClient.publish(topic, payload);
+
+}
+
 void setup()
 {
   // Setup Serial Monitor and Hardware
@@ -126,10 +151,12 @@ void loop()
   float temperature = getTemperature();
   if ((temperature != -999) && (!isnan(temperature))) 
   {
-    // TODO publish value as string to home/device/status/temp
     Serial.print(F("Temperature: "));
     Serial.print(temperature);
     Serial.println(F("°C"));
+  
+    //HERE - test
+    publishTemperature(mqttClient, temperature);
   }
 
 }
