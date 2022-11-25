@@ -3,4 +3,4 @@ See [P36-Home-Automation](P36-Home-Automation.md) for more
 
 **Overview**:
 
-![](attachments/README-1668739333080.jpeg)
+![](assets/README-1668739333080.jpeg)
