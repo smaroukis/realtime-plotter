@@ -57,7 +57,7 @@ void dhtLoop() {
 
 // Custom Get Temp Wrapper
 float getTemperature(){
-  // requires: DHT object
+  // requires: DHT object and sensor event from DHT_unified
   // modifies: prints to the serial monitor
   // returns: temperature as float or NAN if delay has been met, else -999
 
@@ -67,11 +67,15 @@ float getTemperature(){
     float temperature = event.temperature;
 
     if (isnan(temperature)) {
-      Serial.println(F("Error reading temperature!"));
+      Serial.println(F("Error reading temperature from Sensor! (NAN)"));
       temperature = NAN;
     } 
 
     prevTemp_ms = millis(); // delay time is more important than constant cycle time
+    Serial.print(F("Temperature: "));
+    Serial.print(temperature);
+    Serial.println(F("°C"));
+
     return temperature;
   }
 

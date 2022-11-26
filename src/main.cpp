@@ -97,8 +97,12 @@ void connectMqtt()
 // HERE
 // TODO really we should also make a publishStatus helper
 boolean publishTemperature(PubSubClient& mqttClient, float temperature) {
-  // TODO publish value as string to GATEWAY_ID/DEVICE_ID/status/temp
-  // just like mqttClient.publish() returns false if failed
+  // requires: temperature as float, PubSubClient object, globals- GATEWAY_ID and DEVICE_ID
+  // modifies: temporary string buffers
+  // returns: 
+    // mqttClient.publish("GATEWAY_ID/DEVICE_ID/status/temp", temperature)
+    // where temperature is e.g. 25.00 (width 5, precision 2)
+    // just like mqttClient.publish() returns false if failed
 
   // 1) Create Topic String
   const char* tmpStr = "/status/temp";
@@ -108,7 +112,12 @@ boolean publishTemperature(PubSubClient& mqttClient, float temperature) {
 
   // 2)  convert temp float to string to publish
   static char payload[7]; // buffer variable
-  dtostrf(temperature, 6, 2, payload); // dtostrf(float, width, precision, buffer)
+  dtostrf(temperature, 5, 2, payload); // dtostrf(float, width, precision, buffer)
+
+  Serial.print("Publishing to ");
+  Serial.println(topic);
+  Serial.print("Value = ");
+  Serial.println(payload);
 
   // 3) publish
   return mqttClient.publish(topic, payload);
@@ -141,22 +150,18 @@ void loop()
 {
   // Handle WiFi connection
   if (!mqttClient.connected())
-  {
-    reconnect();
-  }
+  { reconnect(); }
+
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
   
   // delay handled in sensorFunctions.h
   // if delay has not been met, -999 is returned
-  float temperature = getTemperature();
+  float temperature = sensorFunctions::getTemperature();
   if ((temperature != -999) && (!isnan(temperature))) 
   {
-    Serial.print(F("Temperature: "));
-    Serial.print(temperature);
-    Serial.println(F("°C"));
-  
-    //HERE - test
-    publishTemperature(mqttClient, temperature);
+    // publisHTemperature returns mqttClient.publish() which is false if failed
+    if (!publishTemperature(mqttClient, temperature))
+      { Serial.println("Error publishing temperature"); }
   }
 
 }
