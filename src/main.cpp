@@ -15,7 +15,7 @@
 #include "secrets.h"
 
 // Custom Headers
-#include "sensorFunctions.h"
+#include "temperatureSensor.h"
 
 // Mqtt publish string specifics
 const char* DEVICE_ID = "esp-01";
@@ -154,9 +154,9 @@ void loop()
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
   
-  // delay handled in sensorFunctions.h
+  // delay handled in temperatureSensor.h
   // if delay has not been met, -999 is returned
-  float temperature = sensorFunctions::getTemperature();
+  float temperature = getTemperature();
   if ((temperature != -999) && (!isnan(temperature))) 
   {
     // publisHTemperature returns mqttClient.publish() which is false if failed

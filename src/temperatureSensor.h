@@ -1,11 +1,7 @@
-// DHT Temperature & Humidity Sensor
-// Unified Sensor Library Example
-// Written by Tony DiCola for Adafruit Industries
-// Released under an MIT license.
+// TODO refactor to .cpp file when done
 
-// REQUIRES the following Arduino libraries:
-// - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
-// - Adafruit Unified Sensor Lib: https://github.com/adafruit/Adafruit_Sensor
+#ifndef temperatureSensor_h
+#define temperatureSensor_h
 
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
@@ -32,16 +28,13 @@ void dhtSetup() {
 
 void dhtLoop() {
   // delay(tempDelay_ms);
-
   sensors_event_t event;
   dht.temperature().getEvent(&event);
   if (isnan(event.temperature)) {
     Serial.println(F("Error reading temperature!"));
   }
   else {
-    Serial.print(F("Temperature: "));
-    Serial.print(event.temperature);
-    Serial.println(F("°C"));
+    Serial.print(F("Temperature: ")); Serial.print(event.temperature); Serial.println(F("°C"));
   }
   // Get humidity event and print its value.
   dht.humidity().getEvent(&event);
@@ -49,9 +42,7 @@ void dhtLoop() {
     Serial.println(F("Error reading humidity!"));
   }
   else {
-    Serial.print(F("Humidity: "));
-    Serial.print(event.relative_humidity);
-    Serial.println(F("%"));
+    Serial.print(F("Humidity: ")); Serial.print(event.relative_humidity); Serial.println(F("%"));
   }
 }
 
@@ -81,3 +72,33 @@ float getTemperature(){
 
   else return -999;
 }
+
+
+float getTemperatureFake(){
+  // requires: DHT object and sensor event from DHT_unified
+  // modifies: prints to the serial monitor
+  // returns: temperature as float or NAN if delay has been met, else -999
+
+  if (millis() - prevTemp_ms >= tempDelay_ms) {
+    // sensors_event_t event;
+    // dht.temperature().getEvent(&event);
+    // float temperature = event.temperature;
+    float temperature = 42.0f;
+
+    if (isnan(temperature)) {
+      Serial.println(F("Error reading temperature from Sensor! (NAN)"));
+      temperature = NAN;
+    } 
+
+    prevTemp_ms = millis(); // delay time is more important than constant cycle time
+    Serial.print(F("Temperature: "));
+    Serial.print(temperature);
+    Serial.println(F("°C"));
+
+    return temperature;
+  }
+
+  else return -999;
+}
+
+#endif
