@@ -10,60 +10,59 @@
 // 3) compare to previous value - may need hysteresis
 // 4) return data (mqtt handled in main) - here just return analog voltage as float
 
-#ifndef waterLevelSensor_h
-#define waterLevelSensor_h
+#ifndef waterLvlSensor_h
+#define waterLvlSensor_h
 
 #include <Arduino.h>
 
-// Vars
-const float RISING_TRIG_VOLTS{0.1f};
-const float FALLING_TRIG_VOLTS{0.05f};
-
-// TODO change pin for ESP32
+// WARN - Board specific
 const int WATER_PIN{54};
+const int AREF_mV{5000}; // 5000 or 3300 mV
+const int MAX_ADC{1023}; // 12bit=4095 ; 10bit=1023
 
-namespace waterLevelSensor {
-    void setup() {
-        Serial.begin(9600);
-    }
+// Vars
+uint16_t previous{};
+unsigned long delayWater_ms{4000};
+unsigned long prevWater_ms{};
+
+// Returns: millivolts as integer - WARN board specific
+// Requires: AREF_mV, MAX_ADC
+int adcToVolts(int n){
+    return n * (AREF_mV / (float)MAX_ADC); // rounding errors are fine
 }
 
-int adcToFloat12(float f){
-    // convert a float to the proper ADC value recog. by the ESP
-    // for 12 bit = 4095 (e.g. esp)
-}
-
-int adcToFloat10(float f){
-    // for 10 bit = 1023 (eg mega)
-    // Serial.print("Analog integer value is ");
-    // Serial.println(f);
-
-    // map(val, fromLow, fromHigh, toLow, toHigh)
-}
-
-float floatToAdc(int n){
-    // conver the adc value to a float
-    // requires: 
-    // 
-}
-
-float normalizeAdc (int adc_val) {
-
-}
-
-float getWaterLevel() {
-    // handle timing here since this will go inside the `main` loop
-    // requires: trigger voltage based on 3.3V supply, ADC capable pin
-    // modifies:
-    // returns: a float that is the analog voltage level (note 3.3V supply)
+// Sets the sensor pin to input
+// Requires WATER_PIN
+void setupWaterLvl() {
     pinMode(WATER_PIN, INPUT);
+}
 
-    // TODO check what ESP returns versus Arduinoa
-    auto volts = adcToFloat10(analogRead(WATER_PIN)); 
+// returns: a float that is the analog voltage level (note 3.3V supply), or -999 if no reading
+// requires: trigger voltage based on 3.3V supply, ADC capable pin
+// n.b.: timing is handled here
+int getWaterLvl_mV() {
+// TODO - better control flow between here a main than returning -999
 
-
-
-
+    if (millis() - prevWater_ms >= delayWater_ms) {
+        auto value = analogRead(WATER_PIN);
+        
+        if (previous != value) {
+            auto val_mV = adcToVolts(value); 
+            previous = value;
+            return val_mV;
+        }
+        else return -999;
+        prevWater_ms = millis();
+    }
+    else return -999;
 }
 
 #endif
+
+// Improvements
+// Refactor to class based
+// Then we can more easily handle timing 
+// and have a simple main getWaterLvl loop
+// see Adafruit unified sensor lib for class based example
+// figure out better control flow when the sensor is not 
+// ready to update `main` with a value (eg timing not yet met)

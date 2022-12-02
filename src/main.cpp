@@ -164,6 +164,8 @@ void loop()
       { Serial.println("Error publishing temperature"); }
   }
 
+  // HERE - TODO implement waterLevelSensor
+
 }
 
 /*  Debugging Checklist
