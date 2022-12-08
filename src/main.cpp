@@ -10,12 +10,15 @@
 #include <WebServer.h>
 #endif
 #include <PubSubClient.h>
+#include <string.h> // for strcmp
 
-// SECRET_SSID and SECRET_PASS
+// SECRET_SSID, SECRET_PASS, DEVICE_ID, GATEWAY_ID
 #include "secrets.h"
 
 // Custom Headers
+#include "sensorStd.h" // RETURN_NULL is -999
 #include "temperatureSensor.h"
+#include "waterLevelSensor.h"
 
 // Mqtt publish string specifics
 const char* DEVICE_ID = "esp-01";
@@ -24,6 +27,9 @@ const char* GATEWAY_ID = "home";
 // Wifi 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient); //lib required for mqtt
+
+// Enum for sensors
+// TODO
 
 void callback(char* topic, byte* payload, unsigned int length) {   //callback includes topic and payload ( from which (topic) the payload is comming)
 
@@ -94,34 +100,67 @@ void connectMqtt()
   }
 }
 
-// HERE
-// TODO really we should also make a publishStatus helper
-boolean publishTemperature(PubSubClient& mqttClient, float temperature) {
-  // requires: temperature as float, PubSubClient object, globals- GATEWAY_ID and DEVICE_ID
-  // modifies: temporary string buffers
-  // returns: 
-    // mqttClient.publish("GATEWAY_ID/DEVICE_ID/status/temp", temperature)
-    // where temperature is e.g. 25.00 (width 5, precision 2)
-    // just like mqttClient.publish() returns false if failed
+// Creates topic string as "<GATEWAY_ID>/<DEVICE_ID>/<function>/<sensor>/<units>"
+// WARN - user must clean up dynamic memory when done
+const char* createTopicStr(const char* function, const char* sensor, const char* units) {
+  // Since we are creating the string on the fly we use dynamic allocation
+  // this way we don't have to pass a buffer and length in
+  // but we do have to clean up the memory afterwards
+  int bLen = 1 + // for trailing null
+              strlen(GATEWAY_ID) + 1 
+              + strlen(DEVICE_ID) + 1 
+              + strlen(function) + 1 
+              + strlen(sensor) + 1 
+              + strlen(units); // counting w forward slashes e.g. "GATEWAY_ID/DEVICE_ID/status/water\0"
+  char* topic = new char[bLen];  
+  snprintf(topic, bLen, "%s/%s/%s/%s/%s", GATEWAY_ID, DEVICE_ID, function, sensor, units); // note size of buffer includes the trailing \0
 
-  // 1) Create Topic String
-  const char* tmpStr = "/status/temp";
-  int bLen = strlen(GATEWAY_ID) + 1 + strlen(DEVICE_ID) + 1 + strlen(tmpStr); // don't forget to count the forward slashes
-  char topic[bLen];
-  sprintf(topic, "%s/%s/status/temp", GATEWAY_ID, DEVICE_ID);
+  return topic;
+  // FUTURE - make array based to support any amount of N_topics
+}
 
-  // 2)  convert temp float to string to publish
-  static char payload[7]; // buffer variable
-  dtostrf(temperature, 5, 2, payload); // dtostrf(float, width, precision, buffer)
+const char* createPayload(int value){
+  if(value > 32767) value = RETURN_NULL;
+  char* buffer = new char[6];
+  sprintf(buffer, "%d", value);
+  return buffer;
+}
 
-  Serial.print("Publishing to ");
-  Serial.println(topic);
-  Serial.print("Value = ");
-  Serial.println(payload);
+const char* createPayload(float value){
+  char* buffer = new char[6];
+  dtostrf(value, 5, 2, buffer); // dtostrf(float, width, precision, buffer)
+  return buffer;
+}
+
+// Publish the temperature or water values to the mqtt broker
+// Returns FALSE if not published
+boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, float value) {
+  // sensor Type is "tempeature" or "water"
+  bool isTemperature = (strcmp(sensorType, "temperature") == 0);
+  bool isWater = (strcmp(sensorType, "water") == 0);
+
+  char* units[3]{};
+  // TODO - iso c++ warning forbids converting a string constant to a char*
+  if (isTemperature) *units = "C";
+  else if (isWater) *units = "mV";
+  else {
+    Serial.println("Invalid sensor type"); 
+    return false;
+  }
+
+  // Create topic and payload, don't forget to clean up dyn. memory
+  const char* topic = createTopicStr("status", sensorType, *units);
+  const char* payload = createPayload(value);
+  Serial.print("Publishing to  topic: "); Serial.println(topic);
+  Serial.print("Value: "); Serial.println(payload);
 
   // 3) publish
-  return mqttClient.publish(topic, payload);
+  auto published = mqttClient.publish(topic, payload);
 
+  // Cleanup dyn. alloc. memory from createTopicStr
+  delete[] topic;
+  delete[] payload;
+  return published;
 }
 
 void setup()
@@ -149,27 +188,37 @@ void setup()
 void loop()
 {
   // Handle WiFi connection
+  // TODO - uncomment when ready to use mqtt
   if (!mqttClient.connected())
   { reconnect(); }
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
-  
-  // delay handled in temperatureSensor.h
-  // if delay has not been met, -999 is returned
-  float temperature = getTemperature();
-  if ((temperature != -999) && (!isnan(temperature))) 
+  // Uncomment to above TODO 
+
+  // delay handled in temperatureSensor.cpp
+  // if delay has not been met, RETURN_NULL is returned
+  auto temperature = getTemperature();
+  if ((temperature != RETURN_NULL) && (!isnan(temperature))) 
   {
-    // publisHTemperature returns mqttClient.publish() which is false if failed
-    if (!publishTemperature(mqttClient, temperature))
+    // publishSensorVal returns mqttClient.publish() which is false if failed
+   if (!publishSensorVal(mqttClient, "temperature", temperature))
       { Serial.println("Error publishing temperature"); }
   }
 
-  // HERE - TODO implement waterLevelSensor
-
+  auto waterLvl = getWaterLvl_mv();
+  if (waterLvl != RETURN_NULL)
+  {
+   if (!publishSensorVal(mqttClient, "water", waterLvl))
+      { Serial.println("Error publishing water level"); }
+  }
 }
 
 /*  Debugging Checklist
 1) Check pin numbers in code
 2) Check breadboarding
 3) 
+*/
+
+/* Improvements
+- see FUTURE comments
 */

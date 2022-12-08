@@ -14,6 +14,7 @@
 #define waterLvlSensor_h
 
 #include <Arduino.h>
+#include "sensorStd.h" // RETURN_NULL is -999
 
 // WARN - Board specific
 const int WATER_PIN{54};
@@ -37,9 +38,10 @@ void setupWaterLvl() {
     pinMode(WATER_PIN, INPUT);
 }
 
-// returns: a float that is the analog voltage level (note 3.3V supply), or -999 if no reading
-// requires: trigger voltage based on 3.3V supply, ADC capable pin
+// returns: an int that is the analog voltage level in MILLIVOLTS or RETURN_NULL if not ready
+// requires: ADC capable pin
 // n.b.: timing is handled here
+/*
 int getWaterLvl_mV() {
 
     if (millis() - prevWater_ms >= delayWater_ms) {
@@ -50,10 +52,20 @@ int getWaterLvl_mV() {
             previous = value;
             return val_mV;
         }
-        else return -999;
+        else return RETURN_NULL;
         prevWater_ms = millis();
     }
-    else return -999;
+    else return RETURN_NULL;
+}
+*/
+
+// REMOVE AFTER TESTING
+int getWaterLvl_mv() {
+    if(millis() - prevWater_ms >= delayWater_ms) {
+        return 4200;
+        prevWater_ms = millis();
+    }
+    else return RETURN_NULL;
 }
 
 #endif

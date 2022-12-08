@@ -7,6 +7,9 @@
 #include <DHT.h>
 #include <DHT_U.h>
 
+// Custom Headers
+#include "sensorStd.h" // for RETURN_NULL
+
 #define DHTPIN 13
 
 // Uncomment the type of sensor in use:
@@ -47,58 +50,39 @@ void dhtLoop() {
 }
 
 // Custom Get Temp Wrapper
+// float getTemperature(){
+//   // requires: DHT object and sensor event from DHT_unified
+//   // modifies: prints to the serial monitor
+//   // returns: temperature as float or NAN if delay has been met, else RETURN_NULL
+
+//   if (millis() - prevTemp_ms >= tempDelay_ms) {
+//     sensors_event_t event;
+//     dht.temperature().getEvent(&event);
+//     float temperature = event.temperature;
+
+//     if (isnan(temperature)) {
+//       Serial.println(F("Error reading temperature from Sensor! (NAN)"));
+//       temperature = NAN;
+//     } 
+
+//     prevTemp_ms = millis(); // delay time is more important than constant cycle time
+//     Serial.print(F("Temperature: "));
+//     Serial.print(temperature);
+//     Serial.println(F("°C"));
+
+//     return temperature;
+//   }
+
+//   else return RETURN_NULL;
+// }
+
+// REMOVE AFTER TESTING
 float getTemperature(){
-  // requires: DHT object and sensor event from DHT_unified
-  // modifies: prints to the serial monitor
-  // returns: temperature as float or NAN if delay has been met, else -999
-
-  if (millis() - prevTemp_ms >= tempDelay_ms) {
-    sensors_event_t event;
-    dht.temperature().getEvent(&event);
-    float temperature = event.temperature;
-
-    if (isnan(temperature)) {
-      Serial.println(F("Error reading temperature from Sensor! (NAN)"));
-      temperature = NAN;
-    } 
-
-    prevTemp_ms = millis(); // delay time is more important than constant cycle time
-    Serial.print(F("Temperature: "));
-    Serial.print(temperature);
-    Serial.println(F("°C"));
-
-    return temperature;
-  }
-
-  else return -999;
-}
-
-
-float getTemperatureFake(){
-  // requires: DHT object and sensor event from DHT_unified
-  // modifies: prints to the serial monitor
-  // returns: temperature as float or NAN if delay has been met, else -999
-
-  if (millis() - prevTemp_ms >= tempDelay_ms) {
-    // sensors_event_t event;
-    // dht.temperature().getEvent(&event);
-    // float temperature = event.temperature;
-    float temperature = 42.0f;
-
-    if (isnan(temperature)) {
-      Serial.println(F("Error reading temperature from Sensor! (NAN)"));
-      temperature = NAN;
-    } 
-
-    prevTemp_ms = millis(); // delay time is more important than constant cycle time
-    Serial.print(F("Temperature: "));
-    Serial.print(temperature);
-    Serial.println(F("°C"));
-
-    return temperature;
-  }
-
-  else return -999;
+    if (millis() - prevTemp_ms >= tempDelay_ms) {
+        prevTemp_ms= millis();
+        return 42.00f;
+    }
+    return RETURN_NULL;
 }
 
 #endif
