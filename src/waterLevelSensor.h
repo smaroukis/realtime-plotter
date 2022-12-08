@@ -41,7 +41,6 @@ void setupWaterLvl() {
 // requires: trigger voltage based on 3.3V supply, ADC capable pin
 // n.b.: timing is handled here
 int getWaterLvl_mV() {
-// TODO - better control flow between here a main than returning -999
 
     if (millis() - prevWater_ms >= delayWater_ms) {
         auto value = analogRead(WATER_PIN);
