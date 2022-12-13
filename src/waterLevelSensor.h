@@ -17,14 +17,11 @@
 #include "sensorStd.h" // RETURN_NULL is -999
 
 // WARN - Board specific
-const int WATER_PIN{54};
-const int AREF_mV{5000}; // 5000 or 3300 mV
-const int MAX_ADC{1023}; // 12bit=4095 ; 10bit=1023
+const int WATER_PIN{34}; // Note we cannot use ADC2 pins as they are used for WiFi
+const int AREF_mV{3300}; // 5000 or 3300 mV
+const int MAX_ADC{4095}; // 12bit=4095 ; 10bit=1023
 
 // Vars
-uint16_t previous{};
-unsigned long delayWater_ms{4000};
-unsigned long prevWater_ms{};
 
 // Returns: millivolts as integer - WARN board specific
 // Requires: AREF_mV, MAX_ADC
@@ -41,29 +38,22 @@ void setupWaterLvl() {
 // returns: an int that is the analog voltage level in MILLIVOLTS or RETURN_NULL if not ready
 // requires: ADC capable pin
 // n.b.: timing is handled here
-/*
+// TODO: refactor to interrupt on positive change
 int getWaterLvl_mV() {
+    static uint16_t previous{0}; // type matches analogRead()
+    static unsigned long delayWater_ms{4000};
+    static unsigned long prevWater_ms{millis()};
 
     if (millis() - prevWater_ms >= delayWater_ms) {
+        prevWater_ms = millis();
         auto value = analogRead(WATER_PIN);
         
-        if (previous != value) {
-            auto val_mV = adcToVolts(value); 
+        if (previous - value > 10 || value - previous > 10) {
             previous = value;
-            return val_mV;
+            Serial.println("DEBUG: Water Level Changed");
+            return adcToVolts(value);
         }
         else return RETURN_NULL;
-        prevWater_ms = millis();
-    }
-    else return RETURN_NULL;
-}
-*/
-
-// REMOVE AFTER TESTING
-int getWaterLvl_mv() {
-    if(millis() - prevWater_ms >= delayWater_ms) {
-        return 4200;
-        prevWater_ms = millis();
     }
     else return RETURN_NULL;
 }

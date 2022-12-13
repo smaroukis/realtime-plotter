@@ -62,7 +62,6 @@ void callback(char* topic, byte* payload, unsigned int length) {   //callback in
   Serial.println();
 }
 
-
 void reconnect() {
   while (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -149,26 +148,26 @@ const char* createUnits(const char* sensorType){
 // Returns FALSE if not published
 boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, float value) {
 
-// Create thee units string
-const char* units = createUnits(sensorType);
-if (strcmp(units, "ERROR") == 0) {
-  Serial.println("Invalid sensor type");
-  return false; // invalid sensor type
-}
+  // Create thee units string
+  const char* units = createUnits(sensorType);
+  if (strcmp(units, "ERROR") == 0) {
+    Serial.println("Invalid sensor type");
+    return false; // invalid sensor type
+  }
 
-  // Create topic and payload, don't forget to clean up dyn. memory
-  const char* topic = createTopicStr("status", sensorType, units);
-  const char* payload = createPayload(value);
-  Serial.print("Publishing to  topic: "); Serial.println(topic);
-  Serial.print("Value: "); Serial.println(payload);
+    // Create topic and payload, don't forget to clean up dyn. memory
+    const char* topic = createTopicStr("status", sensorType, units);
+    const char* payload = createPayload(value);
+    Serial.print("Publishing to  topic: "); Serial.println(topic);
+    Serial.print("Value: "); Serial.println(payload);
 
-  // 3) publish
-  auto published = mqttClient.publish(topic, payload);
+    // 3) publish
+    auto published = mqttClient.publish(topic, payload);
 
-  // Cleanup dyn. alloc. memory from createTopicStr
-  delete[] topic;
-  delete[] payload;
-  return published;
+    // Cleanup dyn. alloc. memory from createTopicStr
+    delete[] topic;
+    delete[] payload;
+    return published;
 }
 
 void setup()
@@ -188,8 +187,19 @@ void setup()
   delay(5000);
   connectMqtt();
 
-// Setup Sensor)s
-  dhtSetup();
+  // Setup Sensor)s
+  setupWaterLvl();
+}
+
+ // Timed Loop to blink led in loop() and print hello
+void blinkHello(unsigned long& lastMillis) {
+  if (millis() - lastMillis > 5000) {
+    lastMillis = millis();
+    Serial.println("hello I'm blinking");
+    Serial.println();
+    // toggle built in led
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  }
 }
 
 
@@ -205,14 +215,19 @@ void loop()
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
 
-  // Nonblocking code to print "in loop" every 5 seconds
+  // Blink LED and print hello
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 5000) {
-    lastMillis = millis();
-    Serial.println("in loop");
+  blinkHello(lastMillis);
+
+  //  Water Level Sensor
+  auto val = getWaterLvl_mV();
+  if (val != RETURN_NULL) {
+    Serial.print("Water Level: ");
+    Serial.println(val);
+    // TODO - Publish to MQTT
   }
 
-  // Uncomment to above TODO 
+   // Uncomment to above TODO 
 
   // delay handled in temperatureSensor.cpp
   // if delay has not been met, RETURN_NULL is returned
