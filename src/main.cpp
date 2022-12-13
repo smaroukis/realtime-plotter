@@ -66,7 +66,13 @@ void callback(char* topic, byte* payload, unsigned int length) {   //callback in
 
 void reconnect() {
   while (!mqttClient.connected()) {
-    Serial.println("Attempting MQTT connection...");
+    Serial.print("Attempting MQTT connection...");
+    Serial.print("from {");
+    Serial.print(espClient.localIP());
+    Serial.print("}...");
+    Serial.print("to {");
+    Serial.print(MQTT_SERVER);
+    Serial.println("}");
     if (mqttClient.connect("ESP32_clientID")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
@@ -90,7 +96,10 @@ void connectMqtt()
   mqttClient.connect("ESP32_clientID");  // ESP will connect to mqtt broker with clientID
   {
     Serial.println("connected to MQTT");
+    // TODO sub and pub topics
     mqttClient.subscribe("inTopic"); //topic=Demo
+    Serial.println("Subscribed to 'inTopic'");
+    // TODO - log which topics we are connected to
     mqttClient.publish("outTopic",  "connected to MQTT");
 
     if (!mqttClient.connected())
@@ -177,10 +186,10 @@ void setup()
 
   mqttClient.setServer(MQTT_SERVER, 1883);//connecting to mqtt server
   mqttClient.setCallback(callback);
-  //delay(5000);
+  delay(5000);
   connectMqtt();
 
-// Setup Sensors
+// Setup Sensor)s
   dhtSetup();
 }
 
@@ -188,9 +197,12 @@ void setup()
 void loop()
 {
   // Handle WiFi connection
-  // TODO - uncomment when ready to use mqtt
   if (!mqttClient.connected())
-  { reconnect(); }
+  { 
+    if (WiFi.status() != WL_CONNECTED) Serial.println("Not Connected to WiFi");
+    WiFi.mode(WIFI_STA); // from https://github.com/knolleary/pubsubclient/issues/203
+    reconnect();
+  }
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
   // Uncomment to above TODO 
