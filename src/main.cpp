@@ -54,11 +54,10 @@ void callback(char* topic, byte* payload, unsigned int length) {   //callback in
   else if ((char)payload[0] == 'O' && (char)payload[1] == 'F' && (char)payload[2] == 'F') //off
   {
     digitalWrite(BUILTIN_LED, LOW);
-    Serial.println(" off");
+    Serial.println("off");
     mqttClient.publish("outTopic", "LED turned OFF");
   }
-
-  // get temperature and publish to `status/temp` 
+  // TODO get temperature and publish to `status/temp` 
 
   Serial.println();
 }
@@ -89,7 +88,6 @@ void reconnect() {
     }
   }
 }
-
 
 void connectMqtt()
 {
@@ -141,24 +139,25 @@ const char* createPayload(float value){
   return buffer;
 }
 
+const char* createUnits(const char* sensorType){
+  if(strcmp(sensorType, "temperature") == 0) return "C";
+  if(strcmp(sensorType, "water") == 0) return "mV";
+  return "ERROR";
+}
+
 // Publish the temperature or water values to the mqtt broker
 // Returns FALSE if not published
 boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, float value) {
-  // sensor Type is "tempeature" or "water"
-  bool isTemperature = (strcmp(sensorType, "temperature") == 0);
-  bool isWater = (strcmp(sensorType, "water") == 0);
 
-  char* units[3]{};
-  // TODO - iso c++ warning forbids converting a string constant to a char*
-  if (isTemperature) *units = "C";
-  else if (isWater) *units = "mV";
-  else {
-    Serial.println("Invalid sensor type"); 
-    return false;
-  }
+// Create thee units string
+const char* units = createUnits(sensorType);
+if (strcmp(units, "ERROR") == 0) {
+  Serial.println("Invalid sensor type");
+  return false; // invalid sensor type
+}
 
   // Create topic and payload, don't forget to clean up dyn. memory
-  const char* topic = createTopicStr("status", sensorType, *units);
+  const char* topic = createTopicStr("status", sensorType, units);
   const char* payload = createPayload(value);
   Serial.print("Publishing to  topic: "); Serial.println(topic);
   Serial.print("Value: "); Serial.println(payload);
@@ -205,10 +204,19 @@ void loop()
   }
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
+
+  // Nonblocking code to print "in loop" every 5 seconds
+  static unsigned long lastMillis = 0;
+  if (millis() - lastMillis > 5000) {
+    lastMillis = millis();
+    Serial.println("in loop");
+  }
+
   // Uncomment to above TODO 
 
   // delay handled in temperatureSensor.cpp
   // if delay has not been met, RETURN_NULL is returned
+  /*
   auto temperature = getTemperature();
   if ((temperature != RETURN_NULL) && (!isnan(temperature))) 
   {
@@ -223,6 +231,7 @@ void loop()
    if (!publishSensorVal(mqttClient, "water", waterLvl))
       { Serial.println("Error publishing water level"); }
   }
+  */
 }
 
 /*  Debugging Checklist
