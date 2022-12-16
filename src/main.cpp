@@ -3,9 +3,11 @@
 // mqttHelper.h and wifiHelper.h
 // sensor code will be removed for this commit s.t. it can serve as a tag to test
 // ------------
-// DESCRIPTION 
+// USAGE: Rename `/include/fakeSecrets.h` to `/include/secrets.h` and modify with the correct wifi and mqtt credentials
+// Library Deps: PubSubClient.h, Arduino.h, WiFi.h
+// Other Dependencies: A MQTT broker running locally (e.g. mosquitto broker on a RasPi) at MQTT_SERVER on MQTT_PORT (1883)
+// DESCRIPTION:
 // This file is in `/src/main.cpp`
-// Modify `/include/secrets.h` with the correct wifi and mqtt credentials
 // This code connects to the wifi and mqtt broker
 // And creates an mqtt client subscribed to "inTopic" and publishing to "outTopic"
 // The code blinks the built in led every 5 seconds
