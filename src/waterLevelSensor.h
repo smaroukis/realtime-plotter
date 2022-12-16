@@ -58,6 +58,15 @@ int getWaterLvl_mV() {
     else return RETURN_NULL;
 }
 
+void loopWaterLvl() {
+    auto val = getWaterLvl_mV();
+    if (val != RETURN_NULL) {
+        Serial.print("Water Level: ");
+        Serial.println(val);
+        // TODO - Publish to MQTT
+    }
+}
+
 #endif
 
 // Improvements
