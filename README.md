@@ -23,11 +23,13 @@ When it receives an MQTT message to the "inTopic" it will print it on the serial
 **On local machine**
 ```
 ssh pi@raspberrypi.local 
-# ... enter user/pass
-hostname -I # prints IP address
+# ... enter user/pass ...
+# print IP address:
+hostname -I 
 # ...
-systemctl status mosquitto.service # check the `mosquitto` status
-# ... if status is running try
+# check the `mosquitto` status:
+systemctl status mosquitto.service 
+# ... if status is running try:
 mosquitto_pub -d -t inTopic -m "ON" 
 # which should turn the builtin on the ESP32 ON if it is OFF
 ```
