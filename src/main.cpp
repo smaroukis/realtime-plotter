@@ -1,12 +1,23 @@
+// N.B.for tag `hello-blink-refactor`
+// The code has been refactored with the helper code in 
+// mqttHelper.h and wifiHelper.h
+// sensor code will be removed for this commit s.t. it can serve as a tag to test
+// ------------
+// DESCRIPTION 
+// This file is in `/src/main.cpp`
+// Modify `/include/secrets.h` with the correct wifi and mqtt credentials
+// This code connects to the wifi and mqtt broker
+// And creates an mqtt client subscribed to "inTopic" and publishing to "outTopic"
+// The code blinks the built in led every 5 seconds
+// We can turn the led on and off by publishing to "inTopic" with the payload "OFF" or "ON"
+// e.g. from the command line: `mosquitto_pub -d -t inTopic -m "ON"`
+
 // Custom Headers
 #include "wifiHelper.h"
 #include "mqttHelper.h"
 #include "sensorStd.h" // RETURN_NULL is -999
 #include "temperatureSensor.h"
 #include "waterLevelSensor.h"
-
-// Enum for sensors
-// TODO
 
 void setup()
 {
@@ -50,30 +61,6 @@ void loop()
   // Blink LED and print hello
   static unsigned long lastMillis = 0;
   blinkHello(lastMillis);
-
-  //  Water Level Sensor
-  loopWaterLvl();
-  
-   // Uncomment to above TODO 
-
-  // delay handled in temperatureSensor.cpp
-  // if delay has not been met, RETURN_NULL is returned
-  /*
-  auto temperature = getTemperature();
-  if ((temperature != RETURN_NULL) && (!isnan(temperature))) 
-  {
-    // publishSensorVal returns mqttClient.publish() which is false if failed
-   if (!publishSensorVal(mqttClient, "temperature", temperature))
-      { Serial.println("Error publishing temperature"); }
-  }
-
-  auto waterLvl = getWaterLvl_mv();
-  if (waterLvl != RETURN_NULL)
-  {
-   if (!publishSensorVal(mqttClient, "water", waterLvl))
-      { Serial.println("Error publishing water level"); }
-  }
-  */
 }
 
 /*  Debugging Checklist

@@ -76,3 +76,7 @@ void loopWaterLvl() {
 // see Adafruit unified sensor lib for class based example
 // figure out better control flow when the sensor is not 
 // ready to update `main` with a value (eg timing not yet met)
+
+/* Example Usage in main.cpp:main()
+  loopWaterLvl();   
+*/

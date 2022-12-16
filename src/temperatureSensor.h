@@ -86,3 +86,16 @@ float getTemperature(){
 }
 
 #endif
+
+
+/*  EXAMPLE USAGE IN MAIN LOOP (main.cpp:main)
+  // delay handled in temperatureSensor.cpp
+  // if delay has not been met, RETURN_NULL is returned
+  auto temperature = getTemperature();
+  if ((temperature != RETURN_NULL) && (!isnan(temperature))) 
+  {
+    // publishSensorVal returns mqttClient.publish() which is false if failed
+   if (!publishSensorVal(mqttClient, "temperature", temperature))
+      { Serial.println("Error publishing temperature"); }
+  }
+*/
