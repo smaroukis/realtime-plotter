@@ -1,7 +1,7 @@
 // TODO refactor to .cpp file when done
 
-#ifndef temperatureSensor_h
-#define temperatureSensor_h
+#ifndef dhtSensor_h
+#define dhtSensor_h
 
 #include <Adafruit_Sensor.h>
 #include <DHT.h>

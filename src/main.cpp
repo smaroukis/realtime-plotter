@@ -2,7 +2,7 @@
 #include "wifiHelper.h"
 #include "mqttHelper.h"
 #include "sensorStd.h" // RETURN_NULL is -999
-#include "temperatureSensor.h"
+#include "bme280.h"
 #include "waterLevelSensor.h"
 
 void setup()
@@ -21,6 +21,7 @@ void setup()
 
   // Setup Sensors
   setupWaterLvl();
+  bmpSetup();
 }
 
  // Timed Loop to blink led in loop() and print hello
@@ -52,6 +53,9 @@ void loop()
   // Blink LED and print hello
   static unsigned long lastMillis = 0;
   blinkHello(lastMillis);
+
+  bmpLoop();
+
 }
 
 /*  Debugging Checklist
