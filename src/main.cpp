@@ -1,19 +1,3 @@
-// N.B.for tag `hello-blink-refactor`
-// The code has been refactored with the helper code in 
-// mqttHelper.h and wifiHelper.h
-// sensor code will be removed for this commit s.t. it can serve as a tag to test
-// ------------
-// USAGE: Rename `/include/fakeSecrets.h` to `/include/secrets.h` and modify with the correct wifi and mqtt credentials
-// Library Deps: PubSubClient.h, Arduino.h, WiFi.h
-// Other Dependencies: A MQTT broker running locally (e.g. mosquitto broker on a RasPi) at MQTT_SERVER on MQTT_PORT (1883)
-// DESCRIPTION:
-// This file is in `/src/main.cpp`
-// This code connects to the wifi and mqtt broker
-// And creates an mqtt client subscribed to "inTopic" and publishing to "outTopic"
-// The code blinks the built in led every 5 seconds
-// We can turn the led on and off by publishing to "inTopic" with the payload "OFF" or "ON"
-// e.g. from the command line: `mosquitto_pub -d -t inTopic -m "ON"`
-
 // Custom Headers
 #include "wifiHelper.h"
 #include "mqttHelper.h"
@@ -30,10 +14,12 @@ void setup()
   digitalWrite(BUILTIN_LED, LOW);
 
   // Setup Wifi and MQTT
+  /*
   setupWifi();
   setupMqtt();
+  */
 
-  // Setup Sensor)s
+  // Setup Sensors
   setupWaterLvl();
 }
 
@@ -50,7 +36,8 @@ void blinkHello(unsigned long& lastMillis) {
 
 void loop()
 {
-  // Handle WiFi connection
+  // ---- START WIFI and MQTT -----
+  /*
   if (!mqttClient.connected())
   { 
     // if (WiFi.status() != WL_CONNECTED) Serial.println("Not Connected to WiFi");
@@ -59,6 +46,8 @@ void loop()
   }
 
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
+  */
+  // ---- END WIFI and MQTT -----
 
   // Blink LED and print hello
   static unsigned long lastMillis = 0;
