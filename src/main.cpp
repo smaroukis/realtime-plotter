@@ -1,10 +1,3 @@
-// Custom Headers
-#include "wifiHelper.h"
-#include "mqttHelper.h"
-#include "sensorStd.h" // RETURN_NULL is -999
-#include "bme280.h"
-#include "waterLevelSensor.h"
-
 /************************* Debugging *********************************/
 #define DEBUG 1
 #if DEBUG == 1
@@ -16,6 +9,12 @@
 #endif
 /********************************************************************/
 
+// Custom Headers
+#include "wifiHelper.h"
+#include "mqttHelper.h"
+#include "sensorStd.h" // RETURN_NULL is -999
+#include "bme280.h"
+#include "waterLevelSensor.h"
 
 void setup()
 {
@@ -35,7 +34,7 @@ void setup()
 
   // Setup Sensors
   setupWaterLvl();
-  bmpSetup();
+  setupBME();
 }
 
  // Timed Loop to blink led in loop() and print hello
@@ -52,6 +51,7 @@ void blinkHello(unsigned long& lastMillis) {
 void loop()
 {
   // ---- START WIFI and MQTT -----
+  // TODO - want to retry wifi three times, then go to sleep if it fails 
   /*
   if (!mqttClient.connected())
   { 
@@ -64,11 +64,42 @@ void loop()
   */
   // ---- END WIFI and MQTT -----
 
-  // Blink LED and print hello
-  static unsigned long lastMillis = 0;
-  blinkHello(lastMillis);
+  // Run once to emulate sleep mode
+  static boolean loop{true};
+  while (loop){
 
-  bmpLoop();
+  // ----- START LOOP CODE ------
+
+  digitalWrite(LED_BUILTIN, HIGH);
+
+  // Sensors
+  float temp = getTemperature_c();
+  if (!publishSensorVal(mqttClient, "temperature", temp)) {
+    debug("Failed to publish temperature, val = {");
+    debug(temp);
+    debugln("}");
+    // Try to tell the outside world that we failed to publish temperature
+  }
+
+  float humid = getHumidity_pct();
+  if (!publishSensorVal(mqttClient, "humidity", humid)) {
+    debug("Failed to publish humidity, val = {");
+    debug(humid);
+    debugln("}");
+  }
+
+  // Warn - need to convert to cPA otherwise will overflow the publish string
+  float pressure = getPressure_kpa();
+  if (!publishSensorVal(mqttClient, "pressure", pressure)) { //   debug(F("Failed to publish pressure, val = {"));
+    debug("Failed to publish humidity, val = {");
+    debug(pressure);
+    debugln(F("}"));
+  }
+
+  // ------ END LOOP CODE -----
+
+  loop = false;
+  }
 
 }
 

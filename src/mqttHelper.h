@@ -22,6 +22,7 @@ void mqttClientReconnect();
 const char* createUnits(const char* sensorType);
 const char* createTopicStr(const char* function, const char* sensor, const char* units) ;
 const char* createPayload(int value);
+const char* createPayload(float value);
 void subscribeAll(PubSubClient& mqttClient);
 
 // ---- Manage Connections and Subscriptions -----
@@ -40,10 +41,10 @@ void connectMqtt()
   // TODO decide on client ID
   mqttClient.connect("ESP32_clientID");  // ESP will connect to mqtt broker with clientID
   {
-    Serial.println("connected to MQTT");
+    debugln("connected to MQTT");
     // TODO sub and pub topics
     subscribeAll(mqttClient);
-    Serial.println("Subscribed to 'inTopic'");
+    debugln("Subscribed to 'inTopic'");
     // TODO - Create topic for this client's status
     mqttClient.publish("outTopic",  "connected to MQTT");
 
@@ -61,19 +62,19 @@ void subscribeAll(PubSubClient& mqttClient) {
 
 void mqttClientReconnect() {
   while (!mqttClient.connected()) {
-    Serial.print("Attempting MQTT connection...to {"); Serial.print(MQTT_SERVER); Serial.println("}");
+    debug("Attempting MQTT connection...to {"); debug(MQTT_SERVER); debugln("}");
 
     if (mqttClient.connect("ESP32_clientID")) {
-      Serial.println("connected");
+      debugln("connected");
       // Once connected, publish an announcement...
       mqttClient.publish("outTopic", "Nodemcu connected to MQTT");
       // ... and resubscribe
         subscribeAll(mqttClient);
 
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
+      debug("failed, rc=");
+      debug(mqttClient.state());
+      debugln(" try again in 5 seconds");
       // Wait 5 seconds before retrying
       delay(5000);
     }
@@ -86,19 +87,19 @@ void mqttClientReconnect() {
 void callback(char* topic, byte* payload, unsigned int length) {   //callback includes topic and payload ( from which (topic) the payload is comming)
 
   // Print topic and payload
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+  debug("Message arrived [");
+  debug(topic);
+  debug("] ");
   for (int i = 0; i < length; i++)
   {
-    Serial.print((char)payload[i]);
+    debug((char)payload[i]);
   }
 
   // If payload is "ON"
   if ((char)payload[0] == 'O' && (char)payload[1] == 'N') //on
   {
     digitalWrite(BUILTIN_LED, HIGH);
-    Serial.println("on");
+    debugln("on");
     mqttClient.publish("outTopic", "LED turned ON");
   }
 
@@ -106,32 +107,34 @@ void callback(char* topic, byte* payload, unsigned int length) {   //callback in
   else if ((char)payload[0] == 'O' && (char)payload[1] == 'F' && (char)payload[2] == 'F') //off
   {
     digitalWrite(BUILTIN_LED, LOW);
-    Serial.println("off");
+    debugln("off");
     mqttClient.publish("outTopic", "LED turned OFF");
   }
   // TODO get temperature and publish to `status/temp` 
 
-  Serial.println();
+  debugln();
 }
 
 // ---- PUBLISH HELPERS ----
 
 // Publish the temperature or water values to the mqtt broker
-// Returns FALSE if not published
+// Returns FALSE if not published or if invalid sensor type
+// Note defined as float but sometimes we pass in an int
+// Although there are limits to the size - see the createPayload function
 boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, float value) {
 
   // Create thee units string
   const char* units = createUnits(sensorType);
-  if (strcmp(units, "ERROR") == 0) {
-    Serial.println("Invalid sensor type");
+  if (strcmp(units, "UNIT_ERR") == 0) {
+    debugln("Invalid sensor type");
     return false; // invalid sensor type
   }
 
     // Create topic and payload, don't forget to clean up dyn. memory
     const char* topic = createTopicStr("status", sensorType, units);
     const char* payload = createPayload(value);
-    Serial.print("Publishing to  topic: "); Serial.println(topic);
-    Serial.print("Value: "); Serial.println(payload);
+    debug("Publishing to  topic: "); debugln(topic);
+    debug("Value: "); debugln(payload);
 
     // 3) publish
     auto published = mqttClient.publish(topic, payload);
@@ -170,16 +173,54 @@ const char* createPayload(int value){
   return buffer;
 }
 
+// TODO - probably better to use strings - is this properly null terminated?
 const char* createPayload(float value){
-  char* buffer = new char[6];
-  dtostrf(value, 5, 2, buffer); // dtostrf(float, width, precision, buffer)
+  char* buffer = new char[8];
+  dtostrf(value, 6, 2, buffer); // dtostrf(float, width, precision, buffer)
   return buffer;
 }
 
 const char* createUnits(const char* sensorType){
   if(strcmp(sensorType, "temperature") == 0) return "C";
   if(strcmp(sensorType, "water") == 0) return "mV";
-  return "ERROR";
+  if(strcmp(sensorType, "humidity") == 0) return "pct";
+  if(strcmp(sensorType, "pressure") == 0) return "kPA";
+  return "UNIT_ERR";
+}
+
+void testMqtt() {
+  // TODO - Test publishSensorVal
+  // TODO - Test createTopicStr
+  // TODO - Test createPayload
+  // TODO - Test createUnits
 }
 
 #endif
+
+
+// WARNING - there are issues for float values above e.g. 1000.0
+// overflow in the buffer when trying to create the string
+/*
+USAGE:
+================
+setup(){
+  setupWifi();
+} 
+================
+loop() {
+  if (!mqttClient.connected())
+  { 
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("Not Connected to WiFi");
+      }
+    mqttClientReconnect();
+  }
+  mqttClient.loop(); // MQTT keep alive, callbacks, etc
+}
+
+if publishSensorVal(mqttClient, "temperature", 23.5) {
+  Serial.println("Published");
+} else {
+  Serial.println("Not Published");
+}
+*/

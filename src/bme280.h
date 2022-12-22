@@ -12,29 +12,36 @@ Adafruit_BME280 bme;
 
 float temperature, humidity, pressure, altitude;
 
-void bmpSetup() {
+void setupBME() {
   Serial.begin(115200);
   delay(100);
   
   bme.begin(0x76);   
 }
 
-void bmpLoop() {
-  static unsigned long lastMillis{0};
+float getTemperature_c() {
+  return bme.readTemperature();
+}
 
-    if (millis() - lastMillis > 3000) {
-        lastMillis = millis();
-        temperature = bme.readTemperature();
-        humidity = bme.readHumidity();
-        pressure = bme.readPressure() / 100.0F;
-        altitude = bme.readAltitude(SEALEVELPRESSURE_HPA);
+float getHumidity_pct() {
+  return bme.readHumidity();
+}
 
-        Serial.print("Temperature = "); Serial.println(temperature);
-        Serial.print("Humidity = "); Serial.println(humidity);
-        Serial.print("Pressure = "); Serial.println(pressure);
-        Serial.print("Altitude = "); Serial.println(altitude);
-        Serial.println();
-    }
+// 101.325 kPa is sea level atmospheric pressure, decreases with altitude
+float getPressure_kpa() {
+  return bme.readPressure()/1000.0F;
+}
+
+// TODO - add error handling
+void bmeLoop() {
+      temperature = getTemperature_c();
+      humidity = getHumidity_pct();
+      pressure = getPressure_kpa();
+
+      Serial.print("Temperature = "); Serial.println(temperature);
+      Serial.print("Humidity = "); Serial.println(humidity);
+      Serial.print("Pressure = "); Serial.println(pressure);
+      Serial.println();
 }
 
 #endif
