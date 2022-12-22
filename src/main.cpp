@@ -5,10 +5,24 @@
 #include "bme280.h"
 #include "waterLevelSensor.h"
 
+/************************* Debugging *********************************/
+#define DEBUG 1
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#else
+#define debug(x) 
+#define debugln(x)
+#endif
+/********************************************************************/
+
+
 void setup()
 {
   // Setup Serial Monitor and Hardware
-  Serial.begin(115200);
+  if (DEBUG == 1) {
+    Serial.begin(115200);
+  } 
 
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
@@ -28,8 +42,8 @@ void setup()
 void blinkHello(unsigned long& lastMillis) {
   if (millis() - lastMillis > 5000) {
     lastMillis = millis();
-    Serial.println("hello I'm blinking");
-    Serial.println();
+    debugln("hello I'm blinking");
+    debugln();
     // toggle built in led
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
   }
