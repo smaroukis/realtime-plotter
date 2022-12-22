@@ -185,6 +185,7 @@ const char* createUnits(const char* sensorType){
   if(strcmp(sensorType, "water") == 0) return "mV";
   if(strcmp(sensorType, "humidity") == 0) return "pct";
   if(strcmp(sensorType, "pressure") == 0) return "kPA";
+  debug("Invalid sensor type {"); debug(sensorType); debugln("} is an invalid sensor type");
   return "UNIT_ERR";
 }
 

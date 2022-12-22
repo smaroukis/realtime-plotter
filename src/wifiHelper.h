@@ -28,7 +28,7 @@ WiFiClient wifiClient;
 // WiFi client is global
 void setupWifi(){
   WiFi.begin(SECRET_SSID, SECRET_PASS);
-  Serial.println("Wifi connected");
+  debugln("Wifi connected");
 }
 
 #endif
