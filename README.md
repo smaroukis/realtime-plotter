@@ -39,6 +39,8 @@ mosquitto_pub -d -t inTopic -m "ON"
 
 > If we want to see the `outTopic` responses from the ESP32 we can open up another terminal on the MQTT broker and subscripe to this topic e.g.
 `mosquitto_sub -d -t outTopic`
+> Or to subscribe to all topics do:
+`mosquitto_sub -d -t "#"`
 
 **Notes/Gotchas**
 - the mosquitto broker has to be configured to accept anonymous connections (disabled by default)

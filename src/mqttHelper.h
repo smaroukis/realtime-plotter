@@ -55,6 +55,13 @@ void connectMqtt()
   }
 }
 
+void disconnectMqtt()
+{
+  // Publish a message saying we're disconnecting
+  mqttClient.publish("outTopic", "Disconnecting from MQTT");
+  mqttClient.disconnect();
+}
+
 void subscribeAll(PubSubClient& mqttClient) {
   // TODO - Subscribe to all topics
   mqttClient.subscribe("inTopic");
