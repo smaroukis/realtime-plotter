@@ -80,9 +80,12 @@ Description:
 
 **Deep Sleep and Wake Upon Interrupt Example**
 Hardware setup: Wakeup when Pin 33 -> LOW
-  Pin 33 -> T1 of Pushbutton
-  T1 of Pushbutton -> Resistor -> 3V3 (PULLUP)
-  T2 of Pushbutton -> GND
+- Pin 33 -> T1 of Pushbutton
+- T1 of Pushbutton -> Resistor -> 3V3 (PULLUP)
+- T2 of Pushbutton -> GND
+
+_Pinout Drawing_:
+![](assets/Example%20-%20ESP32%20Deep%20Sleep-1672037414676.jpeg)
 
 Putting the ESP32 into deep sleep will only keep variables that have been placed into the RTC memory e.g.
 
