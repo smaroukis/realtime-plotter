@@ -112,3 +112,26 @@ if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0) {
     // ...
 }
 ```
+
+### Learning Breakpoint 03 (tag: `learn-bp-03`) - Raindrop Sensor ext0 Wake
+This tagged commit demonstrates:
+- implementing an external interrupt with a raindrop sensor (like this one)
+- if there is rain, the ESP disables the `ext0` interrupt, since we do not want to keep waking up
+- if there is no rain, the interrupt is re-enabled
+
+_Hardware Connections_
+- Rain Sensor `D0` → ESP `D4` 
+- Rain Sensor `A0` → ESP `D33`
+- VCC → 3.3V 
+- Ground
+
+> The sleep values were changed to 
+#### Rain Drop Sensor description
+`D0` is the digital output of the comparator on the rain sensor control board. This is normally `HIGH`. When a raindrop is detected, this pin goes `LOW` (and turns on the on-board `D0` LED). 
+The sensitivity is set by the potentiometer (clockwise raises Vref so this will be more sensitive).
+
+**Detailed Description**
+The inputs to the comparator are `A0` and `V_SENSE`. `V_SENSE` is a voltage divider from `VCC`, based on the potentiometer value. `A0`'s voltage is from a voltage divider between a 10K pullup resistor from `VCC` and the resistance of the rain drop module (infinite when no rain). When it's not raining this rain drop module is an open circuit, so `A0`=`VCC`. When it rains, this resistance decreases, so it pulls `A0` lower, an amount depending on the amount of water on the board (more water = less resistance). If this voltage is pulled below the `V_SENSE` voltage, then the comparator output, thus `D0` swings `LOW`. 
+
+#### Improvements
+- to minimize corrosion we would want to disconnect the voltage to the raindrop monitor when we already know it's raining and we're in deep sleep, we could do this either in hardware using the `D0` pin as a gate input (since once this is low we know it is raining), or in software via the ESP. 
