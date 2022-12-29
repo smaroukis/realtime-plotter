@@ -6,4 +6,16 @@
 // a true value e.g. a timing condition has not been met
 #define RETURN_NULL -999
 
+/************************* Debugging *********************************/
+#define DEBUG 1
+#if DEBUG == 1
+#define debug(x) Serial.print(x)
+#define debugln(x) Serial.println(x)
+#define debugf(format, ...) Serial.printf(format, ##__VA_ARGS__)
+#else
+#define debug(x) 
+#define debugln(x)
+#endif
+/********************************************************************/
+
 #endif

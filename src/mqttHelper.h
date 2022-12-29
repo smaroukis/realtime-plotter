@@ -19,7 +19,6 @@ PubSubClient mqttClient(MQTT_SERVER, MQTT_PORT, callback, wifiClient);
 // --- Function Declarations for Compiler ----
 void connectMqtt();
 void mqttClientReconnect();
-const char* createUnits(const char* sensorType);
 const char* createTopicStr(const char* function, const char* sensor, const char* units) ;
 const char* createPayload(int value);
 const char* createPayload(float value);
@@ -128,20 +127,14 @@ void callback(char* topic, byte* payload, unsigned int length) {   //callback in
 // Returns FALSE if not published or if invalid sensor type
 // Note defined as float but sometimes we pass in an int
 // Although there are limits to the size - see the createPayload function
-boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, float value) {
-
-  // Create thee units string
-  const char* units = createUnits(sensorType);
-  if (strcmp(units, "UNIT_ERR") == 0) {
-    debugln("Invalid sensor type");
-    return false; // invalid sensor type
-  }
+boolean publishSensorVal(PubSubClient& mqttClient, const char* sensorType, const char* units, float value) {
 
     // Create topic and payload, don't forget to clean up dyn. memory
     const char* topic = createTopicStr("status", sensorType, units);
     const char* payload = createPayload(value);
-    debug("Publishing to  topic: "); debugln(topic);
-    debug("Value: "); debugln(payload);
+    debugf("Publishing to  topic: %s\n", topic);
+    debug("\tValue: ");
+    debugln(payload);
 
     // 3) publish
     auto published = mqttClient.publish(topic, payload);
@@ -187,20 +180,10 @@ const char* createPayload(float value){
   return buffer;
 }
 
-const char* createUnits(const char* sensorType){
-  if(strcmp(sensorType, "temperature") == 0) return "C";
-  if(strcmp(sensorType, "water") == 0) return "mV";
-  if(strcmp(sensorType, "humidity") == 0) return "pct";
-  if(strcmp(sensorType, "pressure") == 0) return "kPA";
-  debug("Invalid sensor type {"); debug(sensorType); debugln("} is an invalid sensor type");
-  return "UNIT_ERR";
-}
-
 void testMqtt() {
   // TODO - Test publishSensorVal
   // TODO - Test createTopicStr
   // TODO - Test createPayload
-  // TODO - Test createUnits
 }
 
 #endif
@@ -226,7 +209,7 @@ loop() {
   mqttClient.loop(); // MQTT keep alive, callbacks, etc
 }
 
-if publishSensorVal(mqttClient, "temperature", 23.5) {
+if publishSensorVal(mqttClient, "temperature", "C", 23.5) {
   Serial.println("Published");
 } else {
   Serial.println("Not Published");
