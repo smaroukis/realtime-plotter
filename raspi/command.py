@@ -1,14 +1,12 @@
 #!python3
-###demo code provided by Steve Cope at www.steves-internet-guide.com
-##email steve@steves-internet-guide.com
-###Free to use for any purpose
+# fork of http://www.steves-internet-guide.com/simple-python-mqtt-data-logger/
 import sys, getopt
 options=dict()
 
 ##EDIT HERE ###############
 options["username"]=""
 options["password"]=""
-options["broker"]="127.0.0.1"
+options["broker"]="127.0.0.1" # default is localhost
 options["port"]=1883
 options["verbose"]=True
 options["cname"]=""

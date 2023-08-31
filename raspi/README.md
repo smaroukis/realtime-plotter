@@ -20,7 +20,7 @@ You need to provide the script with:
 Valid command line Options:
 --help <help>
 -h <broker> 
--b <broker> 
+-b <broker default = "127.0.0.1">
 -p <port>
 -t <topic> 
 -q <QOS>
@@ -30,7 +30,7 @@ Valid command line Options:
 -u Username 
 -P Password
 -s <store all data>\
--l <log directory default= mlogs> 
+-l <log directory default= SEE_CODE > 
 -r <number of records default=100>\
 -f <number of log files default= unlimited"
 
