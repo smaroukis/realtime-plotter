@@ -1,8 +1,8 @@
 # secret files for this project
-include/secrets.h
-private/
+esp32/include/secrets.h
+esp32/private/
 
 # dotfiles and build exclude
-.pio/
-.vscode/
-.DS_Store
+esp32/.pio/
+esp32/.vscode/
+esp32/.DS_Store
