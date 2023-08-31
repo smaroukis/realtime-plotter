@@ -231,9 +231,10 @@ t.start() #start logging thread
 client.last_message=dict()
 client.q=q #make queue available as part of client
 
+# Check for local broker, else connect to remote
 try:
-    res=client.connect(client.broker,client.port)      #connect to broker
-    client.loop_start() #start loop
+    res=client.connect(client.broker,client.port) # connect to broker, default is localhost
+    client.loop_start() # start loop
 
 except:
     logging.debug("connection to ",client.broker," failed")
