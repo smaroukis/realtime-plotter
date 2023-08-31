@@ -1,3 +1,6 @@
+# general
+.DS_Store
+
 # secret files for this project
 esp32/include/secrets.h
 esp32/private/
