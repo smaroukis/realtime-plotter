@@ -1,2 +1,1 @@
-paho-mqtt==1.6.1
-mlogger==0.3
+paho-mqtt
