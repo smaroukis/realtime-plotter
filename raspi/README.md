@@ -8,6 +8,10 @@ that send out their state a regular intervals but that state doesn't change
 The program is run from the command line
 You can subscribe to multiple topics.
 
+Usage
+> python mqtt_data_logger.py -t # -d
+With debug mode, all topics under sensors
+By default will log to "/mnt/p303-power-monitor/p303/logs" (see command.py), from local host on port 1883
 
 
 
