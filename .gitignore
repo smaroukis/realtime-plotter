@@ -9,3 +9,6 @@ esp32/private/
 esp32/.pio/
 esp32/.vscode/
 esp32/.DS_Store
+
+# specifics to RasPi
+raspi/venv/*
