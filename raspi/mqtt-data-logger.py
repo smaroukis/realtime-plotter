@@ -9,11 +9,9 @@
 #!/usr/bin/env python
 #If Running in Windows use top line and edit according to your python
 #location and version. If running on Linux delete the top line.
-###Free to use for any purpose
 """
 This will log messages to file.Los time,message and topic as JSON data
 """
-#updated 28-oct-2018
 mqttclient_log=False #MQTT client logs showing messages
 Log_worker_flag=True
 import paho.mqtt.client as mqtt
@@ -178,6 +176,7 @@ def log_worker():
 # ---------------- MAIN -------------------------
 
 options=command.options
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == "__main__" and len(sys.argv)>=2:
     options=command_input(options)
