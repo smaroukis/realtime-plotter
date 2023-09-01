@@ -81,6 +81,7 @@ Data can be stored as plain text or in JSON format """
         self.data=data
         try:
             self.fo.write(data)
+            logging.info("writing data" + data)
             self.writecount+=1
             self.__flushlogs()
             if self.writecount>=self.log_recs:
