@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    Test
+</head>
+
+<body>
+
+  <div id="data"></div>
+  
+  <!-- By Default the socket.io server exposes a client bundlere here, see https://socket.io/docs/v4/client-installation/ -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    // Get div to append data to
+    const dataDiv = document.getElementById('data');
+
+    // Initialize Socket.IO client
+    const socket = io(); 
+
+    // Listen for data events 
+    socket.on('data', (data) => {
+
+        // Create new div element
+        const div = document.createElement('div');
+
+        // Add received data text
+        div.innerText = data;
+
+        // Append div to DOM
+        dataDiv.appendChild(div);
+
+    });
+  </script>
+
+</body>
+</html>
