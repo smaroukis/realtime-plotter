@@ -3,7 +3,7 @@
 import sys, getopt
 options=dict()
 
-##EDIT HERE ###############
+## DEFAULT OPTIONS - EDIT HERE
 options["username"]=""
 options["password"]=""
 options["broker"]="127.0.0.1" # default is localhost
@@ -13,7 +13,7 @@ options["cname"]=""
 options["topics"]=[("",0)]
 options["storechangesonly"]=False
 options["keepalive"]=60
-options["loglevel"]="WARNING"
+options["loglevel"]="INFO" # override with -d for DEBUG 
 options["log_dir"]="./logs"
 options["log_records"]=5000
 options["number_logs"]=0

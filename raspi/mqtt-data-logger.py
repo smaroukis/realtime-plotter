@@ -175,8 +175,7 @@ def log_worker():
 
 # ---------------- MAIN -------------------------
 
-options=command.options
-logging.basicConfig(level=logging.DEBUG)
+options=command.options ## load the options from the command.py module
 
 if __name__ == "__main__" and len(sys.argv)>=2:
     options=command_input(options)
@@ -184,7 +183,15 @@ else:
     print("Need broker name and topics to continue.. exiting")
     raise SystemExit(1)
 
-
+if options["loglevel"]:
+    # default is INFO set in command.options
+    try:
+        logging.basicConfig(level=getattr(logging, options["loglevel"].upper()))
+    except AttributeError:
+        print(f"Invalid log level: {options['loglevel'].upper()}. Using default log level.")
+        logging.basicConfig(level=logging.DEBUG)  # Keep it verbose since we tried to pass a log level
+else:
+    pass # can set no logger by using a blank string in command.options["loglevel"]
 if not options["cname"]:
     r=random.randrange(1,10000)
     cname="logger-"+str(r)
