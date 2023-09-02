@@ -1,5 +1,6 @@
 # general
 .DS_Store
+.vscode
 
 # secret files for this project
 esp32/include/secrets.h
@@ -12,3 +13,5 @@ esp32/.DS_Store
 
 # specifics to RasPi
 raspi/venv/*
+raspi/logs
+raspi/__pycache__
