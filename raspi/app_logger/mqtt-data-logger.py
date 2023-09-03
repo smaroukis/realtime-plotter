@@ -30,14 +30,6 @@ print("Python version is", sys.version_info)
 
 q=Queue()
 
-##helper functions
-def convert(t):
-    d=""
-    for c in t:  # replace all chars outside BMP with a !
-            d =d+(c if ord(c) < 0x10000 else '!')
-    return(d)
-###
-
 class MQTTClient(mqtt.Client):#extend the paho client class
    run_flag=False #global flag used in multi loop
    def __init__(self,cname,**kwargs):
@@ -86,7 +78,7 @@ def on_connect(client, userdata, flags, rc):
    set the bad connection flag for rc >0, Sets onnected_flag if connected ok
    also subscribes to topics
    """
-   logging.debug("Connected flags"+str(flags)+"result code "\
+   logging.debug("(on_connect):Connected flags"+str(flags)+"result code "\
     +str(rc)+"client1_id")
    if rc==0:
       
@@ -119,18 +111,12 @@ def on_message(client,userdata, msg):
 # TODO - can remove json parsing here
 # TODO - look into formatting for writing to csv file
 # Affects: Updates a data dictionary and adds it to the queue
-# The message payload may be json or raw
+# Time is a UTC float
 def message_handler(client,msg,topic):
     data=dict()
-    tnow=time.localtime(time.time())
-    #m=time.asctime(tnow)+" "+topic+" "+msg
-
-    # Try to Parse Message as JSON
-    try:
-        msg=json.loads(msg)#convert to Javascript before saving
-        #print("json data")
-    except:
-        pass # not JSON
+    tnow=time.time() # in UTC (float)
+    # tnow_local=time.localtime(time.time())
+    # m=time.asctime(tnow_local)+" "+topic+" "+msg
 
     # Update data dict
     data["time"]=tnow
@@ -143,6 +129,8 @@ def message_handler(client,msg,topic):
             client.q.put(data) #put messages on queue
     else:
         client.q.put(data) #put messages on queue
+
+    logging.debug("(message_handler): put data in queue, data='{}'".format(data))
 
 def has_changed(client,topic,msg):
     topic2=topic.lower()
@@ -183,21 +171,25 @@ else:
     print("Need broker name and topics to continue.. exiting")
     raise SystemExit(1)
 
+# Setup Debug Logging (see command.py for default log level)
 if options["loglevel"]:
-    # default is INFO set in command.options
     try:
         logging.basicConfig(level=getattr(logging, options["loglevel"].upper()))
     except AttributeError:
         print(f"Invalid log level: {options['loglevel'].upper()}. Using default log level.")
-        logging.basicConfig(level=logging.DEBUG)  # Keep it verbose since we tried to pass a log level
+        logging.basicConfig(level=logging.debug)  # Keep it verbose since we tried to pass a log level
 else:
     pass # can set no logger by using a blank string in command.options["loglevel"]
+# Done Setting Up Debug Logging
+
+# Setup File Name
 if not options["cname"]:
     r=random.randrange(1,10000)
     cname="logger-"+str(r)
 else:
     cname="logger-"+str(options["cname"])
 log_dir=options["log_dir"]
+
 log_records=options["log_records"]
 number_logs=options["number_logs"]
 log=mlogger.m_logger(log_dir,log_records,number_logs) #create log object
@@ -218,7 +210,7 @@ if options["username"] !="":
 client.sub_topics=options["topics"]
 client.broker=options["broker"]
 client.port=options["port"]
-options["JSON"]=True #currently only supports JSON
+
 if options["JSON"]:
     print("Logging JSON format")
 else:

@@ -76,12 +76,22 @@ Data can be stored as plain text or in JSON format """
         jdata=json.dumps(data)+"\n"
         self.log_data(jdata)                                                                                          
                                                                                          
-    # TODO - look into formatting  for csv file
+    # TODO - Fails on non-json (is dict)
+    # CSV formatting is difficult because it requires a header
     def log_data(self, data):
         self.data=data
+        # Try to Parse Message as JSON
+        try:
+            data=json.dumps(json.loads(data)) # parse JSON, store as string
+            logging.debug("(log_data): parsed json data")
+        except:
+            data=str(data)
+            logging.debug("(log_data): parsed raw data")
+            pass # not JSON
+
         try:
             self.fo.write(data)
-            logging.info("writing data" + data)
+            logging.info("(log_data):writing data" + data)
             self.writecount+=1
             self.__flushlogs()
             if self.writecount>=self.log_recs:
