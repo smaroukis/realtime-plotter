@@ -13,5 +13,7 @@ esp32/.DS_Store
 
 # specifics to RasPi
 raspi/venv/*
-raspi/logs
+raspi/logs/*
+raspi/app_logger/logs/*
 raspi/__pycache__
+raspi/app_logger/__pycache__
