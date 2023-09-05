@@ -145,6 +145,7 @@ def has_changed(client,topic,msg):
 # Separate Thread Worker for Processing the Queue and Sending it for Log
 # Requires: mlogger.py log_json(), thread is started in main
 # Runs in the background in infinite loop to process the queue
+# HANDLES FORMATTING OF DATA (JSON/RAW)
 def log_worker():
     """runs in own thread to log data from queue"""
     while Log_worker_flag:
@@ -154,11 +155,18 @@ def log_worker():
             results = q.get()
             if results is None:
                 continue
+            # JSON DATA
             if options["JSON"]:
-                log.log_json(results)
+                try: 
+                    results = json.dumps(json.loads(results)) 
+                    logging.debug("(log_worker): parsed json data")
+                except:
+                    logging.debug("(log_worker): couldnt parse json data, parsed as string")
+                    log.log_json(str(results))
+            # RAW DATA
             else:
-                log.log_data(results)
-            #print("message saved ",results["message"])
+                logging.debug("(log_worker): parsed raw data")
+                log.log_data(str(results))
     log.close_file()
 
 # ---------------- MAIN -------------------------

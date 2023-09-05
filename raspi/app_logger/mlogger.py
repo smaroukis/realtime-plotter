@@ -78,16 +78,9 @@ Data can be stored as plain text or in JSON format """
                                                                                          
     # TODO - Fails on non-json (is dict)
     # CSV formatting is difficult because it requires a header
+    # Formatting is done in mqtt-data-logger log_workers
     def log_data(self, data):
         self.data=data
-        # Try to Parse Message as JSON
-        try:
-            data=json.dumps(json.loads(data)) # parse JSON, store as string
-            logging.debug("(log_data): parsed json data")
-        except:
-            data=str(data)
-            logging.debug("(log_data): parsed raw data")
-            pass # not JSON
 
         try:
             self.fo.write(data)
@@ -105,4 +98,3 @@ Data can be stored as plain text or in JSON format """
             logging.error("Error on_data: %s" % str(e))
             return False
         return True
-
