@@ -163,10 +163,12 @@ def log_worker():
                 except:
                     logging.debug("(log_worker): couldnt parse json data, parsed as string")
                     log.log_json(str(results))
-            # RAW DATA
+            # RAW DATA - TODO/later Add Header for CSV if first time 
             else:
                 logging.debug("(log_worker): parsed raw data")
-                log.log_data(str(results))
+                # TODO check how float is converted
+                results = "{}, {}, {}".format(results["time"], results["topic"], results["message"])
+                log.log_data(results)
     log.close_file()
 
 # ---------------- MAIN -------------------------
