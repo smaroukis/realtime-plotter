@@ -104,3 +104,4 @@ Data can be stored as plain text or in JSON format """
     def plot_data(self, data):
         msg = data["message"]
         logging.info("(plot_data): message= {}".format(msg))
+        # See Logger.plot_data for implementation
