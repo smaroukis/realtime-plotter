@@ -158,17 +158,20 @@ def log_worker():
             # JSON DATA
             if options["JSON"]:
                 try: 
-                    results = json.dumps(json.loads(results)) 
+                    results_json = json.dumps(json.loads(results)) 
                     logging.debug("(log_worker): parsed json data")
                 except:
                     logging.debug("(log_worker): couldnt parse json data, parsed as string")
-                    log.log_json(str(results))
+                    log.log_json(str(results_json))
             # RAW DATA - TODO/later Add Header for CSV if first time 
             else:
                 logging.debug("(log_worker): parsed raw data")
                 # TODO check how float is converted
-                results = "{}, {}, {}".format(results["time"], results["topic"], results["message"])
-                log.log_data(results)
+                results_csv = "{}, {}, {}".format(results["time"], results["topic"], results["message"])
+                log.log_data(results_csv)
+
+            # Plotting 
+            log.plot_data(results)
     log.close_file()
 
 # ---------------- MAIN -------------------------

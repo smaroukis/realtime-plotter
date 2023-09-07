@@ -1,4 +1,4 @@
-# TODO - look into how new directories are created 
+# TODO - add plotter member to also handle data
 
 
 """
@@ -98,3 +98,9 @@ Data can be stored as plain text or in JSON format """
             logging.error("Error on_data: %s" % str(e))
             return False
         return True
+    
+    # Plot data (send to plotter)
+    # Requires: Dictionary with keys: time, topic, message
+    def plot_data(self, data):
+        msg = data["message"]
+        logging.info("(plot_data): message= {}".format(msg))
