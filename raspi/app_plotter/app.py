@@ -1,25 +1,36 @@
-# NEXT - merge app.py 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
 
+
 class Plotter:
 
-    def __init__(self):
+    def __init__(self, save_path = None):
         self.x = []
         self.y = []
+        self.save_path = save_path
+        self.frames = 1000
+        self.interval = 100
 
         self.fig, self.ax = plt.subplots()
         self.line, = self.ax.plot([], [], lw=2)
         self.ax.set_xlim(0, 2*np.pi) 
         self.ax.set_ylim(-1, 1)
-        self.ani = FuncAnimation(self.fig, self.update, interval=100) 
+        self.ani = FuncAnimation(self.fig, self.update, frames = self.frames, interval=self.interval) 
+
+        # Setup callbacks
+        self.fig.canvas.mpl_connect('close_event', self.on_close)
 
     def __del__(self):
-        pass
-        # if not self.fig.closed:
-        #     print("closing plot")
-        #     self.fig.close()
+        plt.close(self.fig)
+
+    def save(self):
+        if self.save_path:
+            self.fig.savefig("{}.png".format(self.save_path))
+
+    def on_close(self, event):
+        # Note the mpl handler passes the event
+        self.save()
 
     def store_datapoint(self, x, y):
         """ Store data in a list
@@ -41,5 +52,5 @@ class Plotter:
         self.line.set_data(self.x, self.y)
         return self.line, 
 
-plotter = Plotter()
+plotter = Plotter("test_fig")
 plt.show()
