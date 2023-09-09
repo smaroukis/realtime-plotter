@@ -18,6 +18,7 @@ options["log_dir"]="./logs"
 options["log_records"]=5000
 options["number_logs"]=0
 options["JSON"]=False
+options["plotter"]=True
 
 
 def command_input(options={}):

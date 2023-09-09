@@ -99,9 +99,8 @@ Data can be stored as plain text or in JSON format """
             return False
         return True
     
-    # Plot data (send to plotter)
     # Requires: Dictionary with keys: time, topic, message
-    def plot_data(self, data):
-        msg = data["message"]
-        logging.info("(plot_data): message= {}".format(msg))
+    # def plot_data(self, data):
+    #     msg = data["message"]
+    #     logging.info("(plot_data): message= {}".format(msg))
         # See Logger.plot_data for implementation

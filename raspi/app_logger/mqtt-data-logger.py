@@ -24,11 +24,13 @@ import mlogger as mlogger
 import threading
 from queue import Queue
 from command import command_input
+import plotter as plotter
 import command
 import sys
 print("Python version is", sys.version_info)
 
-q=Queue()
+q_log =Queue()
+q_plot = Queue()
 
 class MQTTClient(mqtt.Client):#extend the paho client class
    run_flag=False #global flag used in multi loop
@@ -106,11 +108,10 @@ def on_message(client,userdata, msg):
     topic=msg.topic
     m_decode=str(msg.payload.decode("utf-8","ignore"))
     message_handler(client,m_decode,topic)
-    #print("message received")
     
 # TODO - can remove json parsing here
 # TODO - look into formatting for writing to csv file
-# Affects: Updates a data dictionary and adds it to the queue
+# Affects: Updates a data dictionary and adds it to the queue for logging and plotting
 # Time is a UTC float
 def message_handler(client,msg,topic):
     data=dict()
@@ -126,9 +127,10 @@ def message_handler(client,msg,topic):
     # Put the data in the queue
     if command.options["storechangesonly"]:
         if has_changed(client,topic,msg):
-            client.q.put(data) #put messages on queue
+            client.q_log.put(data) #put messages on queue
+            # NOTE - putting messages on queue will trigger the log_worker which also calls the Plotter
     else:
-        client.q.put(data) #put messages on queue
+        client.q_log.put(data) #put messages on queue
 
     logging.debug("(message_handler): put data in queue, data='{}'".format(data))
 
@@ -151,8 +153,8 @@ def log_worker():
     while Log_worker_flag:
         time.sleep(0.01)
         # Retrieve next queue item until empty
-        while not q.empty():
-            results = q.get()
+        while not q_log.empty():
+            results = q_log.get()
             if results is None:
                 continue
             # JSON DATA
@@ -171,7 +173,12 @@ def log_worker():
                 log.log_data(results_csv)
 
             # Plotting 
-            log.plot_data(results)
+            # add to plotting queue
+            x = results["time"]
+            y = results["message"]
+            q_plot.put({'x': x, 'y': y})
+            print("(log_worker): put messages on plotting queue")
+
     log.close_file()
 
 # ---------------- MAIN -------------------------
@@ -192,8 +199,7 @@ if options["loglevel"]:
         print(f"Invalid log level: {options['loglevel'].upper()}. Using default log level.")
         logging.basicConfig(level=logging.debug)  # Keep it verbose since we tried to pass a log level
 else:
-    pass # can set no logger by using a blank string in command.options["loglevel"]
-# Done Setting Up Debug Logging
+    pass
 
 # Setup File Name
 if not options["cname"]:
@@ -203,9 +209,10 @@ else:
     cname="logger-"+str(options["cname"])
 log_dir=options["log_dir"]
 
+## Create Message Logger 
 log_records=options["log_records"]
 number_logs=options["number_logs"]
-log=mlogger.m_logger(log_dir,log_records,number_logs) #create log object
+log = mlogger.m_logger(log_dir,log_records,number_logs) #create log object
 print("Log Directory =",log_dir)
 print("Log records per log =",log_records)
 if number_logs==0:
@@ -213,9 +220,9 @@ if number_logs==0:
 else:
     print("Max logs  =",number_logs)
     
-
 logging.info("creating client"+cname)
 
+## Create MQTT Client
 client=Initialise_clients(cname,mqttclient_log,False)#create and initialise client object
 if options["username"] !="":
     client.username_pw_set(options["username"], options["password"])
@@ -233,6 +240,13 @@ if options["storechangesonly"]:
 else:
     print("starting storing all data")
     
+## Setup Plotter
+if options["plotter"]:
+    plot_saveas = "{}.png".format(log.file_name)
+    logging.getLogger('matplotlib.font_manager').disabled = True # to silence matplotlib.font_manager debug output
+    plot = plotter.Plotter(q_plot, plot_saveas)
+    logging.info("Created plotter → {}".format(plot_saveas))
+
 ## Set Up Thread for Log Worker
 #Log_worker_flag=True
 t = threading.Thread(target=log_worker) #start logger
@@ -240,7 +254,7 @@ t.start() #start logging thread
 ###
 
 client.last_message=dict()
-client.q=q #make queue available as part of client
+client.q_log = q_log #make queue available as part of client
 
 # Check for local broker, else connect to remote
 try:
@@ -250,14 +264,17 @@ try:
 except:
     logging.debug("connection to ",client.broker," failed")
     raise SystemExit("connection failed")
+
 try:
+    # Loop until a keyboard interrupt
     while True:
         time.sleep(1)
-        pass
-
+        pass 
 except KeyboardInterrupt:
     print("interrrupted by keyboard")
 
+# If keyboard interrupt, handle shutdown
+del plot
 client.loop_stop() #start loop
 Log_worker_flag=False #stop logging thread
 time.sleep(5)
