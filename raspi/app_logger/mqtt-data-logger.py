@@ -237,7 +237,7 @@ else:
 if options["plotter"]:
     plot_saveas = "{}.png".format(log.file_name)
     logging.getLogger('matplotlib.font_manager').disabled = True # to silence matplotlib.font_manager debug output
-    plot = plotter.Plotter(q_plot, plot_saveas, interval=100)
+    plot = plotter.Plotter(q_plot, plot_saveas, interval=1000)
     logging.info("Created plotter → {}".format(plot_saveas))
 
     # plt.ion() # might need to include matplotlib

@@ -7,20 +7,24 @@ from queue import Queue
 
 class Plotter:
 
-    def __init__(self, data_queue, save_path = None, _frames = 100, _update_rate = 1000):
+    def __init__(self, data_queue, save_path = None, interval = 1000):
         """ 
         REQUIRES: data_queue with 'x' and 'y' keys. E.g. externally data_queue.put({'x': 1, 'y': 1}) 
         """
+        # TODO - add support for style = "scatter"
+        # TODO - add "keep last" for not overflowing buffer
+        # TODO - allow frames to be passed
         self.x = []
         self.y = []
         self.save_path = save_path
         self.data_queue = data_queue
+        self.interval = interval
 
         self.fig, self.ax = plt.subplots()
         self.line, = self.ax.plot([], [], lw=2)
         # self.ax.set_xlim(0, 2*np.pi) 
         self.ax.set_ylim(-1, 1) # to avoid divide by zero when setting axis limits
-        self.ani = FuncAnimation(self.fig, self.update, frames = _frames, interval= _update_rate) 
+        self.ani = FuncAnimation(self.fig, self.update,interval= self.interval) 
 
         # Setup callback to save figure on user closing window
         self.fig.canvas.mpl_connect('close_event', self.on_close)
@@ -45,7 +49,6 @@ class Plotter:
         # Note the mpl handler passes the event as an arg
         print("(plotter.on_close): user close event, calling self.stop()")
         self.save()
-        self.stop()
 
     def show(self):
         # plt.show(self.fig)
@@ -62,8 +65,8 @@ class Plotter:
         Separates the ingestion of data from the plotting of data"""
         self.x.append(x)
         self.y.append(y)
-        print("(Plotter.store_datum): appended x='{}'".format(x))
-        print("(Plotter.store_datum): appended y='{}'".format(y))
+        print("(Plotter.store_datum): appended x='{}' (dtype={})".format(x, type(x)))
+        print("(Plotter.store_datum): appended y='{}' (dtype={})".format(y, type(y)))
 
     def update(self, frame):
         """ Update function that is called by FuncAnimation
@@ -72,19 +75,20 @@ class Plotter:
         REQUIRES: data queue with 'x' and 'y' keys
         See store_datum(x,y) for adding data to members"""
         # See __init__ for adding queue to plotter
-        print("(plotter.update): call to plotter.update")
+        print(f"(plotter.update): call to plotter.update (frame {frame})")
 
         while not self.data_queue.empty():
             data = self.data_queue.get()
-            self.store_datum(data['x'], data['y'])
+            self.store_datum(float(data['x']), float(data['y']))
+            # self.store_datum(frame, float(data['y']))
         
         # Update Plot
-        if frame > 0: # fix error for numpy of one element
+        if len(self.x) > 0:
             self.ax.set_xlim([min(self.x), max(self.x)])
             self.ax.set_ylim([min(self.y), max(self.y)])
 
         self.line.set_data(self.x, self.y)
-        self.fig.canvas.flush_events()
+        # self.fig.canvas.flush_events()
         plt.pause(0.001)
         return self.line, 
 
@@ -101,15 +105,16 @@ if __name__ == "__main__":
     for i in range(10):
         q.put({'x': i, 'y': 1})
 
-    plt.show()
+    plt.ion()
+    ani = plot.ani 
 
     try: 
         while True:
-            # time.sleep(0.001)
+            plt.pause(0.1) # need a small pause to allow animation updates
             pass
     except KeyboardInterrupt:
-        plot.close()
-        del plot
+        plot.stop()
+        plt.ioff()
         print("Exiting")
         exit(0)
 
