@@ -12,10 +12,10 @@ The program is run from the command line
 You can subscribe to multiple topics.
 
 Usage
-> python mqtt_data_logger.py -t # -d -h <hostname>
-With debug mode, all topics under sensors
-By default will log to "/mnt/p303-power-monitor/p303/logs" (see command.py), from local host on port 1883
-
+```sh
+python app.py -t # -d -h 192.168.0.17 -g 
+```
+> i.e. "all topics ("#"), for mqtt broker on host 192.168.0.17, include plotting (-g)
 
 You need to provide the script with:
 
@@ -39,8 +39,8 @@ Valid command line Options:
 -s <store all data>\
 -l <log directory default= SEE_CODE > 
 -r <number of records default=100>\
--f <number of log files default= unlimited"
--g <graph/plot>
+-f <number of log files default= "unlimited">
+-g <include graphing/plotting>
 
 ## Example Usage:
 
@@ -49,24 +49,24 @@ and the topics to log
 
 Specify broker and topics 
 
-    python mqtt_data_logger.py -b 192.168.1.157 -t sensors/#
+    python app.py -b 192.168.1.157 -t sensors/#
 
 Specify broker and multiple topics
 
-    python mqtt_data_logger.py -b 192.168.1.157 -t sensors/# -t  home/#
+    python app.py -b 192.168.1.157 -t sensors/# -t  home/#
 	
 
 Log All Data:
 
-    python mqtt_data_logger.py b 192.168.1.157 -t sensors/# -s 
+    python app.py b 192.168.1.157 -t sensors/# -s 
 
 Specify the client name used by the logger
 
-    python mqtt_data_logger.py b 192.168.1.157 -t sensors/# -n data-logger
+    python app.py b 192.168.1.157 -t sensors/# -n data-logger
 
 Specify the log directory
 
-    python mqtt_data_logger.py b 192.168.1.157 -t sensors/# -l mylogs
+    python app.py b 192.168.1.157 -t sensors/# -l mylogs
 
 ## Plotter Class
 
