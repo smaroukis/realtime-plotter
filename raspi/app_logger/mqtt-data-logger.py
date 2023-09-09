@@ -1,7 +1,4 @@
-## example usage: python mqtt-data-logger.py -h 192.168.0.17 -d -t test
-## ERROR: plotting/animation function is not able to update in the background
-# could be a threading/scope issue 
-
+## example usage: python mqtt-data-logger.py -h 192.168.0.17 -d -t test -g
 
 # modified from http://www.steves-internet-guide.com/download/mqtt-data-logger/
 """
@@ -20,6 +17,7 @@ import threading
 from queue import Queue
 from command import command_input
 import plotter as plotter
+import matplotlib.pyplot as plt
 import command
 import sys
 print("Python version is", sys.version_info)
@@ -144,7 +142,7 @@ def has_changed(client,topic,msg):
 # Runs in the background in infinite loop to process the queue
 # HANDLES FORMATTING OF DATA (JSON/RAW)
 def log_worker():
-    """runs in own thread to log data from queue"""
+    """runs in own thread to log data from queue and add data to plot queue"""
     while Log_worker_flag:
         time.sleep(0.01)
         # Retrieve next queue item until empty
@@ -156,13 +154,13 @@ def log_worker():
             if options["JSON"]:
                 try: 
                     results_json = json.dumps(json.loads(results)) 
-                    logging.debug("(log_worker): parsed json data")
+                    # logging.debug("(log_worker): parsed json data")
                 except:
                     logging.debug("(log_worker): couldnt parse json data, parsed as string")
                     log.log_json(str(results_json))
             # RAW DATA - TODO/later Add Header for CSV if first time 
             else:
-                logging.debug("(log_worker): parsed raw data")
+                # logging.debug("(log_worker): parsed raw data")
                 # TODO check how float is converted
                 results_csv = "{}, {}, {}".format(results["time"], results["topic"], results["message"])
                 log.log_data(results_csv)
@@ -172,7 +170,7 @@ def log_worker():
             x = results["time"]
             y = results["message"]
             q_plot.put({'x': x, 'y': y}) 
-            print("(log_worker): put messages on plotting queue")
+            logging.debug("(log_worker): put messages on plotting queue")
 
     log.close_file()
 
@@ -239,9 +237,13 @@ else:
 if options["plotter"]:
     plot_saveas = "{}.png".format(log.file_name)
     logging.getLogger('matplotlib.font_manager').disabled = True # to silence matplotlib.font_manager debug output
-    plot = plotter.Plotter(q_plot, plot_saveas)
+    plot = plotter.Plotter(q_plot, plot_saveas, interval=100)
     logging.info("Created plotter → {}".format(plot_saveas))
-    plot.show()
+
+    # plt.ion() # might need to include matplotlib
+    ani = plot.ani
+else: 
+    logging.debug(("PLOTTING NOT ENABLED"))
 
 ## Set Up Thread for Log Worker
 #Log_worker_flag=True
@@ -264,13 +266,15 @@ except:
 try:
     # Loop until a keyboard interrupt
     while True:
-        time.sleep(1)
+        plt.pause(0.1) # need small pause to allow animation to update
         pass 
 except KeyboardInterrupt:
     print("interrrupted by keyboard")
 
 # If keyboard interrupt, handle shutdown
-del plot
+if options["plotter"]:
+    plot.stop()
+    plt.ioff()
 client.loop_stop() #start loop
 Log_worker_flag=False #stop logging thread
 time.sleep(5)

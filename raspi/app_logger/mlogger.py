@@ -77,13 +77,13 @@ Data can be stored as plain text or in JSON format """
         self.log_data(jdata)                                                                                          
                                                                                          
     # TODO - Fails on non-json (is dict)
-    # CSV formatting is difficult because it requires a header
-    # Formatting is done in mqtt-data-logger log_workers
+    # CSV data is logged without a header
+    # Formatting is done in mqtt-data-logger log_worker
     def log_data(self, data):
         self.data=data
 
         try:
-            self.fo.write(data)
+            self.fo.write(data + "\n")
             logging.info("(log_data):writing data:'{}'".format(data))
             self.writecount+=1
             self.__flushlogs()
@@ -99,8 +99,3 @@ Data can be stored as plain text or in JSON format """
             return False
         return True
     
-    # Requires: Dictionary with keys: time, topic, message
-    # def plot_data(self, data):
-    #     msg = data["message"]
-    #     logging.info("(plot_data): message= {}".format(msg))
-        # See Logger.plot_data for implementation

@@ -18,7 +18,7 @@ options["log_dir"]="./logs"
 options["log_records"]=5000
 options["number_logs"]=0
 options["JSON"]=False
-options["plotter"]=True
+options["plotter"]=False
 
 
 def command_input(options={}):
@@ -28,10 +28,10 @@ def command_input(options={}):
     valid_options=" --help <help> -h or -b <broker> -p <port>-t <topic> -q QOS -v <verbose> -h <help>\
  -d logging debug  -n Client ID or Name -u Username -P Password -s <store all data>\
 -l <log directory default= mlogs> -r <number of records default=100>\
--f <number of log files default= unlimited> -j <log in json format>"
+-f <number of log files default= unlimited> -j <log in json format> -g <enable graphing>"
     print_options_flag=False
     try:
-      opts, args = getopt.getopt(sys.argv[1:],"h:b:jsdk:p:t:q:l:vn:u:P:l:r:f:")
+      opts, args = getopt.getopt(sys.argv[1:],"h:b:jsdgk:p:t:q:l:vn:u:P:l:r:f:")
     except getopt.GetoptError:
       print (sys.argv[0],valid_options)
       sys.exit(2)
@@ -70,6 +70,8 @@ def command_input(options={}):
             options["number_logs"]=int(arg)
         elif opt =="-j":
             options["JSON"]=True
+        elif opt =="-g":
+            options["plotter"]=True
 
 
     lqos=len(qos_in)

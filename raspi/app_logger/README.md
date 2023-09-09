@@ -3,16 +3,18 @@ Simple Python MQTT Data Logger
 This software uses the Python logger to create a logfile
 for all messages for all topics to which this MQTT client
 has subscribed.
+
+The data can also be graphed in realtime using matploblib. Enable this with the `-g` switch
+
 Note: by default it will only log changed messages. This is for sensors 
 that send out their state a regular intervals but that state doesn't change
 The program is run from the command line
 You can subscribe to multiple topics.
 
 Usage
-> python mqtt_data_logger.py -t # -d
+> python mqtt_data_logger.py -t # -d -h <hostname>
 With debug mode, all topics under sensors
 By default will log to "/mnt/p303-power-monitor/p303/logs" (see command.py), from local host on port 1883
-
 
 
 You need to provide the script with:
@@ -21,6 +23,7 @@ You need to provide the script with:
     broker name and port
     username and password if needed.
     base log directory and number of logs have defaults
+
 Valid command line Options:
 --help <help>
 -h <broker> 
@@ -37,14 +40,12 @@ Valid command line Options:
 -l <log directory default= SEE_CODE > 
 -r <number of records default=100>\
 -f <number of log files default= unlimited"
+-g <graph/plot>
 
-	Example Usage:
+## Example Usage:
 
 You will always need to specify the broker name or IP address 
 and the topics to log
-
-Note: you may not need to use the python prefix or may 
-need to use python3 mqtt_data_logger.py (Linux)
 
 Specify broker and topics 
 
@@ -66,9 +67,38 @@ Specify the client name used by the logger
 Specify the log directory
 
     python mqtt_data_logger.py b 192.168.1.157 -t sensors/# -l mylogs
+
+## Plotter Class
+
+The plotter class in `plotter.py` allows the data to be plotted and updated in real time with the matplotlib.animate.FuncAnimation function.
+It will also save the figure upon closing, in the same directory as the log data.
+
+The plotter and logger interact with each other via a queue system, since the `log_worker` is run in its own thread.
+
+The Plotter class typically requires a `data_queue` Queue object and the filepath to save the figure to (passed from the `mlogger` class).
+```
+def __init__(self, data_queue, save_path = None, style = "line", _frames = 100, _update_rate = 1000):
+```
+
+In `log_worker` we push the data onto the plotter q (`q_plot`) which is processed by the `plotter.update()` member function that is passed as a callback to `FuncAnimation()`. The data is actually stored in the member variables `plotter.x` and `plotter.y`. 
+
+```
+x = results["time"]
+y = results["message"]
+q_plot.put({'x': x, 'y': y}) 
+```
+
+In the `plotter.update()` member function we have
+```
+while not self.data_queue.empty():
+    data = self.data_queue.get()
+    # self.store_datum(float(data['x']), float(data['y']))
+    self.store_datum(frame, float(data['y']))
+```
  
----------
-Logger Class
+
+## Logger Class
+> from original repo
 
 The class is implemented in a module called m_logger.py (message logger).
 
@@ -113,4 +143,3 @@ The logger will return True if successful and False if not.
 To prevent loss of data in the case of computer failure the logs are continuously flushed to disk .
  
  Read more about this application here:
-http://www.steves-internet-guide.com/simple-python-mqtt-data-logger/
