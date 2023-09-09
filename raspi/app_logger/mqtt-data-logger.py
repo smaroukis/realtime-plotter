@@ -1,14 +1,9 @@
-# uses paho mqtt client
-# see mlogger.py for actual writing of data
-# has option to only store changes 
-# thread safe queue object
-# topics are passed via command line arguments
+## example usage: python mqtt-data-logger.py -h 192.168.0.17 -d -t test
+## ERROR: plotting/animation function is not able to update in the background
+# could be a threading/scope issue 
 
-# source: http://www.steves-internet-guide.com/download/mqtt-data-logger/
-#!c:\python34\python.exe
-#!/usr/bin/env python
-#If Running in Windows use top line and edit according to your python
-#location and version. If running on Linux delete the top line.
+
+# modified from http://www.steves-internet-guide.com/download/mqtt-data-logger/
 """
 This will log messages to file.Los time,message and topic as JSON data
 """
@@ -173,10 +168,10 @@ def log_worker():
                 log.log_data(results_csv)
 
             # Plotting 
-            # add to plotting queue
+            # add to plotting queue, see plotter update 
             x = results["time"]
             y = results["message"]
-            q_plot.put({'x': x, 'y': y})
+            q_plot.put({'x': x, 'y': y}) 
             print("(log_worker): put messages on plotting queue")
 
     log.close_file()
@@ -246,6 +241,7 @@ if options["plotter"]:
     logging.getLogger('matplotlib.font_manager').disabled = True # to silence matplotlib.font_manager debug output
     plot = plotter.Plotter(q_plot, plot_saveas)
     logging.info("Created plotter → {}".format(plot_saveas))
+    plot.show()
 
 ## Set Up Thread for Log Worker
 #Log_worker_flag=True
@@ -278,4 +274,3 @@ del plot
 client.loop_stop() #start loop
 Log_worker_flag=False #stop logging thread
 time.sleep(5)
-
