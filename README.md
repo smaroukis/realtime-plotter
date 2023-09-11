@@ -16,10 +16,14 @@ Example Video:
 
 ![example video](assets/example.mov)
 
+Esp32 code for sensor and mqtt client/publishing is also included.
+
 
 ## Setting Up the ESP32 sensor
 
-A BME temperature sensor is used over Two-Wire/I2C
+A BME temperature sensor is used over Two-Wire/I2C. 
+
+TODO - wiring diagram
 
 ## Setting up the RasPi/MQTT Broker
 
@@ -53,3 +57,21 @@ mosquitto_pub -d -t inTopic -m "ON"
 **Notes/Gotchas**
 - the mosquitto broker has to be configured to accept anonymous connections (disabled by default)
 - put the ESP32 in "flash" mode by (1) pressing and holding BOOT (2) pressing and releasing ENABLE (3) releasing BOOT
+
+
+# Code Description - ESP32 
+
+Overview:
+- publishes values to topic as e.g. `GATEWAY_ID/DEVICE_ID/temperature/32.0`
+- was implemented using C style strings, should probably be refactored to smart pointers and std library strings
+- currently implemented publishing from a bme280 temperature and humidity sensor (via Adafruit libary)
+
+## `mqttHelper`
+
+Establishes a connection to an MQTT broker, subscribes to specific topics, and publishes sensor data to MQTT topics.  including potential buffer overflow issues when dealing with large float values, minimal error handling, and limited documentation. Additionally, it lacks configurability for MQTT client parameters, making it less flexible for different MQTT broker setups
+
+Need to add more error handling and confirugability for different MQTT client parameters (e.g. name, etc).
+
+## `wifiHelper`
+
+Sets up wifi with the `WiFi.h` library.

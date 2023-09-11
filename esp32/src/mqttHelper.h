@@ -1,5 +1,15 @@
 // Requires: wifiHelper::<WiFiClient wifiClient> and secrets.h
 // After the wifi connection is established, we can connect to the MQTT broker
+
+// this mqtt client will listen for messages on the topic "inTopic" and publish messages to the topic "outTopic"
+// controls the BUILT_IN_LED when a message of "ON" or "OFF" is received on the topic "inTopic" 
+
+// publishes sensor values
+  // message payload creator (temperature and water implemented)
+  // topic string creator e.g. "GATEWAY_ID/DEVICE_ID/status/water"
+
+// TODOs: use smart pointers, use std c strings
+
 #ifndef MQTT_HELPER_H
 #define MQTT_HELPER_H
 
@@ -28,10 +38,6 @@ void subscribeAll(PubSubClient& mqttClient);
 
 // Connect to the MQTT broker and subscribe to topics through the callback
 void setupMqtt(){
-// TODO delete below once the initialization is tested and working
-//   mqttClient.setServer(MQTT_SERVER, 1883);//connecting to mqtt server
-//   mqttClient.setCallback(callback);
-//   delay(5000);
   connectMqtt();
 }
 
