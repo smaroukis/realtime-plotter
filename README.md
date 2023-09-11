@@ -1,5 +1,7 @@
 Real time data logging to csv and concurrent plotting with matplotlib, creating an mqtt client to listen to the specified topic on a specified mqtt broker/host. 
 
+![real time plotter image](./assets/sshot_realtime_plotter.png)
+
 Logger is under `raspi/app_logger/app.py`. For example: 
 ```sh
 python raspi/app_logger/app.py -t # -d -h 192.168.0.17 -g 
@@ -11,6 +13,7 @@ Seperate threads and callbacks are made for plotting and writing to the datafile
 - `plotter.update` is the `matplotlib.animate.funcanimation` function that updates the graph every provided `interval` (also has a queue to process data)
 
 Example Video:
+
 ![example video](assets/example.mov)
 
 
